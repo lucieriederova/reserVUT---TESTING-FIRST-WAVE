@@ -2,12 +2,12 @@ import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import * as mem from '../services/memoryStore.js';
 import { validateEmailDomain } from '../services/memoryStore.js';
-
+ 
 type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
-
+ 
 let prisma: PrismaClient | null = null;
 let dbAvailable = false;
-
+ 
 async function getDb(): Promise<PrismaClient | null> {
   if (!process.env.DATABASE_URL) return null;
   if (prisma) return dbAvailable ? prisma : null;
@@ -22,9 +22,9 @@ async function getDb(): Promise<PrismaClient | null> {
     return null;
   }
 }
-
+ 
 const AUTO_VERIFIED: Role[] = ['STUDENT', 'HEAD_ADMIN'];
-
+ 
 function mapRole(raw: string): Role | null {
   const map: Record<string, Role> = {
     student: 'STUDENT', STUDENT: 'STUDENT',
@@ -34,35 +34,32 @@ function mapRole(raw: string): Role | null {
   };
   return map[raw] ?? null;
 }
-
-// POST /api/auth/login
+ 
 export async function loginUser(req: Request, res: Response): Promise<void> {
-  const { supabaseUserId, email, role: rawRole, firstName, lastName } = req.body as {
-    supabaseUserId: string;
-    email: string;
-    role: string;
-    firstName?: string;
-    lastName?: string;
-  };
-
+  const supabaseUserId = req.body.supabaseUserId as string;
+  const email = req.body.email as string;
+  const rawRole = req.body.role as string;
+  const firstName = req.body.firstName as string | undefined;
+  const lastName = req.body.lastName as string | undefined;
+ 
   if (!supabaseUserId || !email || !rawRole) {
     res.status(400).json({ error: 'supabaseUserId, email and role are required' });
     return;
   }
-
+ 
   if (!validateEmailDomain(email)) {
     res.status(400).json({ error: 'Only @vut.cz and @vutbr.cz email addresses are allowed.' });
     return;
   }
-
+ 
   const role = mapRole(rawRole);
   if (!role) {
     res.status(400).json({ error: `Invalid role: ${rawRole}` });
     return;
   }
-
+ 
   const db = await getDb();
-
+ 
   if (db) {
     try {
       const existing = await db.user.findUnique({ where: { supabaseId: supabaseUserId } });
@@ -70,7 +67,7 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
         const updated = await db.user.update({
           where: { supabaseId: supabaseUserId },
           data: {
-            role,
+            role: role as any,
             email,
             isVerified: AUTO_VERIFIED.includes(role),
             ...(firstName && { firstName }),
@@ -86,7 +83,7 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
             firstName: firstName ?? '',
             lastName: lastName ?? '',
             vutId: `vut-${Date.now()}`,
-            role,
+            role: role as any,
             isVerified: AUTO_VERIFIED.includes(role),
           },
         });
@@ -97,12 +94,11 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
       console.error('DB auth error, falling back:', e);
     }
   }
-
+ 
   const user = mem.upsertUser({ supabaseId: supabaseUserId, email, role, firstName, lastName });
   res.json({ user, created: false });
 }
-
-// GET /api/auth/users
+ 
 export async function getUsers(_req: Request, res: Response): Promise<void> {
   const db = await getDb();
   if (db) {
@@ -114,11 +110,10 @@ export async function getUsers(_req: Request, res: Response): Promise<void> {
   }
   res.json({ users: mem.getAllUsers() });
 }
-
-// PATCH /api/auth/users/:id/role
+ 
 export async function updateUserRole(req: Request, res: Response): Promise<void> {
-  const { id } = req.params;
-  const { role: rawRole } = req.body as { role: string };
+  const id = req.params.id as string;
+  const rawRole = req.body.role as string;
   const role = mapRole(rawRole);
   if (!role) {
     res.status(400).json({ error: `Invalid role: ${rawRole}` });
@@ -129,7 +124,7 @@ export async function updateUserRole(req: Request, res: Response): Promise<void>
     try {
       const user = await db.user.update({
         where: { id },
-        data: { role, isVerified: AUTO_VERIFIED.includes(role) },
+        data: { role: role as any, isVerified: AUTO_VERIFIED.includes(role) },
       });
       res.json({ user });
       return;
@@ -139,10 +134,9 @@ export async function updateUserRole(req: Request, res: Response): Promise<void>
   if (!user) { res.status(404).json({ error: 'User not found' }); return; }
   res.json({ user });
 }
-
-// PATCH /api/auth/users/:id/verify
+ 
 export async function verifyUser(req: Request, res: Response): Promise<void> {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const db = await getDb();
   if (db) {
     try {
