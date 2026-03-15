@@ -59,23 +59,23 @@ export default function LoginView({ onLogin, onShowSignUp, error }: LoginViewPro
 
           {/* Role selector */}
           <div className="flex justify-center gap-3 mb-6">
-            {ROLE_OPTIONS.map(({ role, label, icon }) => (
-              <button
-                key={role}
-                onClick={() => handleRoleSelect(role)}
-                className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-all ${
-                  selectedRole === role
-                    ? 'bg-purple-100 ring-2 ring-purple-500'
-                    : 'bg-gray-50 hover:bg-gray-100'
-                }`}
-              >
-                <span className="text-2xl">{icon}</span>
-                <span className="text-[9px] font-semibold text-gray-600 text-center leading-tight max-w-[48px]">
-                  {label}
-                </span>
-              </button>
-            ))}
-          </div>
+          {ROLE_OPTIONS.map(({ role, label, icon }) => (
+            <button
+              key={role}
+              onClick={() => handleRoleSelect(role)}
+              className={`flex flex-col items-center justify-center gap-1 w-20 h-20 rounded-lg transition-all ${
+                selectedRole === role
+                  ? 'bg-purple-100 ring-2 ring-purple-500'
+                  : 'bg-gray-50 hover:bg-gray-100'
+              }`}
+            >
+              <span className="text-2xl">{icon}</span>
+              <span className="text-[9px] font-semibold text-gray-600 text-center leading-tight max-w-[48px]">
+                {label}
+              </span>
+            </button>
+          ))}
+        </div>
 
           {/* Email */}
           <div className="mb-3">
