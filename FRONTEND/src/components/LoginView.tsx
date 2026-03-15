@@ -40,9 +40,9 @@ export default function LoginView({ onLogin, onShowSignUp, error }: LoginViewPro
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* reserVUT badge top right */}
       <div className="absolute top-4 right-4">
-        <span className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-          reserVUT
-        </span>
+        <span className="bg-purple-600 text-white text-sm font-bold px-4 py-2 rounded-full">
+    reserVUT
+  </span>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4">
