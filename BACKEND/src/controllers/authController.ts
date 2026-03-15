@@ -1,9 +1,10 @@
 import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import * as mem from '../services/memoryStore.js';
-import { validateEmailDomain } from '../services/memoryStore.js';
  
 type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
+ 
+const HEAD_ADMIN_EMAIL = '269387@vutbr.cz';
  
 let prisma: PrismaClient | null = null;
 let dbAvailable = false;
@@ -25,14 +26,19 @@ async function getDb(): Promise<PrismaClient | null> {
  
 const AUTO_VERIFIED: Role[] = ['STUDENT', 'HEAD_ADMIN'];
  
-function mapRole(raw: string): Role | null {
+function mapRole(raw: string, email: string): Role | null {
   const map: Record<string, Role> = {
     student: 'STUDENT', STUDENT: 'STUDENT',
     ceo: 'CEO', CEO: 'CEO',
     guide: 'GUIDE', Guide: 'GUIDE', GUIDE: 'GUIDE',
     'head admin': 'HEAD_ADMIN', head_admin: 'HEAD_ADMIN', HEAD_ADMIN: 'HEAD_ADMIN',
   };
-  return map[raw] ?? null;
+  const role = map[raw] ?? null;
+  // Only allow HEAD_ADMIN for the designated email
+  if (role === 'HEAD_ADMIN' && email !== HEAD_ADMIN_EMAIL) {
+    return 'STUDENT';
+  }
+  return role;
 }
  
 export async function loginUser(req: Request, res: Response): Promise<void> {
@@ -47,12 +53,7 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
     return;
   }
  
-  if (!validateEmailDomain(email)) {
-    res.status(400).json({ error: 'Only @vut.cz and @vutbr.cz email addresses are allowed.' });
-    return;
-  }
- 
-  const role = mapRole(rawRole);
+  const role = mapRole(rawRole, email);
   if (!role) {
     res.status(400).json({ error: `Invalid role: ${rawRole}` });
     return;
@@ -114,7 +115,7 @@ export async function getUsers(_req: Request, res: Response): Promise<void> {
 export async function updateUserRole(req: Request, res: Response): Promise<void> {
   const id = req.params.id as string;
   const rawRole = req.body.role as string;
-  const role = mapRole(rawRole);
+  const role = mapRole(rawRole, '');
   if (!role) {
     res.status(400).json({ error: `Invalid role: ${rawRole}` });
     return;
