@@ -3,6 +3,7 @@ import { User, ReservationType, ROOMS_BY_ROLE, TYPES_BY_ROLE, MAX_DURATION_MINUT
 
 interface BookingModalProps {
   user: User;
+  rooms?: string[];
   onClose: () => void;
   onConfirm: (data: {
     roomName: string;
@@ -38,8 +39,8 @@ const TYPE_LABELS: Record<ReservationType, string> = {
   OTHER: 'Other',
 };
 
-export default function BookingModal({ user, onClose, onConfirm }: BookingModalProps) {
-  const rooms = ROOMS_BY_ROLE[user.role];
+export default function BookingModal({ user, rooms: roomsProp, onClose, onConfirm }: BookingModalProps) {
+  const rooms = roomsProp ?? ROOMS_BY_ROLE[user.role];
   const types = TYPES_BY_ROLE[user.role];
   const maxDuration = MAX_DURATION_MINUTES[user.role];
 
