@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  STUDENT
+  CEO
+  GUIDE
+  HEAD_ADMIN
+}
+
+enum ReservationStatus {
+  ACTIVE
+  CANCELLED
+  PREEMPTED
+}
+
+enum ReservationType {
+  MEETING
+  SESSION
+  WORKSHOP
+  PITCHDECK
+  EVENT
+  OTHER
+}
+
+model User {
+  id           String        @id @default(uuid())
+  supabaseId   String        @unique
+  email        String        @unique
+  firstName    String?
+  lastName     String?
+  vutId        String?       @unique
+  role         Role          @default(STUDENT)
+  isVerified   Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
+  auditLogs    AuditLog[]    @relation("PerformedBy")
+}
+
+model Reservation {
+  id            String            @id @default(uuid())
+  roomName      String
+  startTime     DateTime
+  endTime       DateTime
+  description   String?
+  type          ReservationType   @default(MEETING)
+  priorityLevel Int               @default(1)
+  status        ReservationStatus @default(ACTIVE)
+  userId        String
+  user          User              @relation(fields: [userId], references: [id])
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  auditLogs     AuditLog[]        @relation("AuditedReservation")
+
+  @@index([roomName, startTime, endTime])
+  @@index([startTime])
+  @@index([userId, startTime])
+}
+
+model AuditLog {
+  id              String       @id @default(uuid())
+  action          String
+  reason          String?
+  performedById   String
+  performedBy     User         @relation("PerformedBy", fields: [performedById], references: [id])
+  reservationId   String?
+  reservation     Reservation? @relation("AuditedReservation", fields: [reservationId], references: [id])
+  createdAt       DateTime     @default(now())
+
+  @@index([reservationId])
+  @@index([performedById])
+}
