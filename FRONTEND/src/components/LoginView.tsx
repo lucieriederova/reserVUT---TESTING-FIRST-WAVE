@@ -46,7 +46,7 @@ export default function LoginView({ onLogin, onShowSignUp, error }: LoginViewPro
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
+      <div className="bg-white rounded-2xl shadow-lg w-full max-w-xl p-10">
           {/* Logo */}
           <div className="flex justify-center mb-2">
             <div className="flex items-center gap-1">
