@@ -208,7 +208,7 @@ export default function StudentView({
 
           {/* CANCELLED */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex-1">
-            <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center mb-3">CANCLED</p>
+            <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center mb-3">CANCELED</p>
             <div className="space-y-2">
               {cancelledReservations.length === 0 && <p className="text-xs text-gray-400 text-center italic">None</p>}
               {cancelledReservations.map((r) => (
