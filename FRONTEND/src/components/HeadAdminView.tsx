@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Reservation, Room, UserRole } from './types';
+import { User, Reservation, Room, UserRole, ReservationType } from './types';
 import BookingModal from './BookingModal';
 import ProfileModal from './ProfileModal';
 import CalendarGrid from './CalendarGrid';
@@ -28,6 +28,7 @@ interface HeadAdminViewProps {
     startTime: string;
     endTime: string;
     description: string;
+    type?: ReservationType;
   }) => Promise<void>;
   onCancelReservation: (id: string) => Promise<void>;
   onUpdateUser: (updates: Partial<User>) => void;
@@ -75,17 +76,8 @@ const navItems: { key: AdminSection; label: string }[] = [
 ];
 
 export default function HeadAdminView({
-  user,
-  reservations,
-  rooms,
-  allUsers,
-  onLogout,
-  onCreateReservation,
-  onCancelReservation,
-  onUpdateUser,
-  onChangeUserRole,
-  onVerifyUser,
-  onAddRoom,
+  user, reservations, rooms, allUsers, onLogout, onCreateReservation,
+  onCancelReservation, onUpdateUser, onChangeUserRole, onVerifyUser, onAddRoom,
 }: HeadAdminViewProps) {
   const [activeSection, setActiveSection] = useState<AdminSection>('CALENDAR');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -106,52 +98,39 @@ export default function HeadAdminView({
   const [dbSearch, setDbSearch] = useState('');
 
   const avatarIndex = user.avatarIndex ?? 0;
-
   const guides = allUsers.filter((u) => u.role === 'GUIDE');
   const leaders = allUsers.filter((u) => u.role === 'CEO');
   const filteredUsers = allUsers.filter(
-    (u) =>
-      dbSearch === '' ||
+    (u) => dbSearch === '' ||
       u.email.toLowerCase().includes(dbSearch.toLowerCase()) ||
       `${u.firstName} ${u.lastName}`.toLowerCase().includes(dbSearch.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
-      {/* Top navbar */}
       <div className="bg-gray-900 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            <span className="bg-red-600 text-white font-bold text-sm px-1.5 py-0.5 rounded">T</span>
-            <span className="bg-gray-600 text-gray-200 font-bold text-sm px-1.5 py-0.5 rounded">FP</span>
-          </div>
+        <div className="flex items-center gap-1">
+          <span className="bg-red-600 text-white font-bold text-sm px-1.5 py-0.5 rounded">T</span>
+          <span className="bg-gray-600 text-gray-200 font-bold text-sm px-1.5 py-0.5 rounded">FP</span>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-            className={`transition-colors ${notificationsEnabled ? 'text-purple-400' : 'text-gray-600'}`}
-          >
+          <button onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+            className={`transition-colors ${notificationsEnabled ? 'text-purple-400' : 'text-gray-600'}`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
             </svg>
           </button>
-          <button
-            onClick={() => setShowProfile(true)}
-            className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-lg"
-          >
+          <button onClick={() => setShowProfile(true)} className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-lg">
             {AVATARS[avatarIndex]}
           </button>
           <div className="text-right">
-            <p className="text-xs font-semibold text-gray-200">
-              {user.firstName} {user.lastName}
-            </p>
+            <p className="text-xs font-semibold text-gray-200">{user.firstName} {user.lastName}</p>
             <p className="text-xs text-gray-500">{user.email}</p>
           </div>
         </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
         <div className={`bg-gray-800 flex flex-col transition-all duration-200 ${sidebarCollapsed ? 'w-12' : 'w-52'}`}>
           {!sidebarCollapsed && (
             <div className="p-4 border-b border-gray-700">
@@ -163,37 +142,21 @@ export default function HeadAdminView({
               <p className="text-[9px] text-gray-500 uppercase tracking-widest">HEAD ADMIN HOME</p>
             </div>
           )}
-
           <nav className="flex-1 py-2">
             {navItems.map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setActiveSection(key)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold transition-colors ${
-                  activeSection === key
-                    ? 'text-white bg-gray-700'
-                    : 'text-gray-400 hover:text-gray-200'
-                }`}
-              >
-                <span className={activeSection === key ? 'text-white' : 'text-gray-500'}>
-                  {NAV_ICONS[key]}
-                </span>
+              <button key={key} onClick={() => setActiveSection(key)}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold transition-colors ${activeSection === key ? 'text-white bg-gray-700' : 'text-gray-400 hover:text-gray-200'}`}>
+                <span className={activeSection === key ? 'text-white' : 'text-gray-500'}>{NAV_ICONS[key]}</span>
                 {!sidebarCollapsed && <span className="uppercase tracking-wider">{label}</span>}
               </button>
             ))}
           </nav>
-
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="m-2 text-gray-500 hover:text-gray-300 bg-gray-700 rounded-full w-7 h-7 flex items-center justify-center self-end transition-colors"
-          >
+          <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="m-2 text-gray-500 hover:text-gray-300 bg-gray-700 rounded-full w-7 h-7 flex items-center justify-center self-end transition-colors">
             {sidebarCollapsed ? '›' : '‹'}
           </button>
-
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-2 px-4 py-3 text-xs text-gray-500 hover:text-gray-200 border-t border-gray-700 transition-colors"
-          >
+          <button onClick={onLogout}
+            className="flex items-center gap-2 px-4 py-3 text-xs text-gray-500 hover:text-gray-200 border-t border-gray-700 transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
@@ -201,17 +164,13 @@ export default function HeadAdminView({
           </button>
         </div>
 
-        {/* Main content */}
         <div className="flex-1 bg-gray-100 overflow-auto">
-          {/* CALENDAR */}
           {activeSection === 'CALENDAR' && (
             <div className="flex flex-col h-full">
               <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3">
                 <div className="relative">
-                  <button
-                    onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
-                    className="flex items-center gap-2 border border-gray-300 rounded px-3 py-1.5 text-sm bg-white hover:bg-gray-50 min-w-[160px] justify-between"
-                  >
+                  <button onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
+                    className="flex items-center gap-2 border border-gray-300 rounded px-3 py-1.5 text-sm bg-white hover:bg-gray-50 min-w-[160px] justify-between">
                     <span className="text-gray-600">{selectedRoom || 'SELECT ROOM'}</span>
                     <span className="text-gray-400">▼</span>
                   </button>
@@ -237,16 +196,12 @@ export default function HeadAdminView({
                   </div>
                   <CalendarGrid
                     reservations={reservations.filter((r) => !selectedRoom || r.roomName === selectedRoom)}
-                    weekOffset={weekOffset}
-                    onReservationClick={() => {}}
-                    currentUserId={user.id}
-                  />
+                    weekOffset={weekOffset} onReservationClick={() => {}} currentUserId={user.id} />
                 </div>
               </div>
             </div>
           )}
 
-          {/* REPORTS */}
           {activeSection === 'REPORTS' && (
             <div className="p-6">
               <h2 className="text-lg font-bold text-gray-800 mb-4">Reports</h2>
@@ -269,10 +224,8 @@ export default function HeadAdminView({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 text-[10px] text-gray-400 uppercase tracking-wider">
-                      <th className="text-left px-4 py-2">Room</th>
-                      <th className="text-left px-4 py-2">User</th>
-                      <th className="text-left px-4 py-2">Start</th>
-                      <th className="text-left px-4 py-2">End</th>
+                      <th className="text-left px-4 py-2">Room</th><th className="text-left px-4 py-2">User</th>
+                      <th className="text-left px-4 py-2">Start</th><th className="text-left px-4 py-2">End</th>
                       <th className="text-left px-4 py-2">Status</th>
                     </tr>
                   </thead>
@@ -284,9 +237,7 @@ export default function HeadAdminView({
                         <td className="px-4 py-2 text-gray-500">{new Date(r.startTime).toLocaleString('cs-CZ')}</td>
                         <td className="px-4 py-2 text-gray-500">{new Date(r.endTime).toLocaleString('cs-CZ')}</td>
                         <td className="px-4 py-2">
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                            {r.status}
-                          </span>
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{r.status}</span>
                         </td>
                       </tr>
                     ))}
@@ -296,29 +247,22 @@ export default function HeadAdminView({
             </div>
           )}
 
-          {/* ROLES */}
           {activeSection === 'ROLES' && (
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex gap-1 bg-gray-200 rounded-lg p-1">
                   <button onClick={() => setRolesTab('GUIDES')}
-                    className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${rolesTab === 'GUIDES' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'}`}>
-                    GUIDES
-                  </button>
+                    className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${rolesTab === 'GUIDES' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'}`}>GUIDES</button>
                   <button onClick={() => setRolesTab('LEADERS')}
-                    className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${rolesTab === 'LEADERS' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'}`}>
-                    LEADERS
-                  </button>
+                    className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${rolesTab === 'LEADERS' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500'}`}>LEADERS</button>
                 </div>
               </div>
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 text-[10px] text-gray-400 uppercase tracking-wider">
-                      <th className="text-left px-4 py-3">USER DETAILS</th>
-                      <th className="text-left px-4 py-3">VUT ID</th>
-                      <th className="text-left px-4 py-3">ROLE</th>
-                      <th className="text-left px-4 py-3">ACTIONS</th>
+                      <th className="text-left px-4 py-3">USER DETAILS</th><th className="text-left px-4 py-3">VUT ID</th>
+                      <th className="text-left px-4 py-3">ROLE</th><th className="text-left px-4 py-3">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -340,14 +284,10 @@ export default function HeadAdminView({
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
                             <button onClick={() => { setManageUser(u); setManageNewRole(u.role); }}
-                              className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-bold px-3 py-1 rounded-lg transition-colors">
-                              MANAGE
-                            </button>
-                            {onVerifyUser && !u.role.includes('STUDENT') && (
+                              className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-bold px-3 py-1 rounded-lg transition-colors">MANAGE</button>
+                            {onVerifyUser && (
                               <button onClick={() => onVerifyUser(u.id)}
-                                className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold px-3 py-1 rounded-lg transition-colors">
-                                VERIFY
-                              </button>
+                                className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold px-3 py-1 rounded-lg transition-colors">VERIFY</button>
                             )}
                           </div>
                         </td>
@@ -362,7 +302,6 @@ export default function HeadAdminView({
             </div>
           )}
 
-          {/* DATABASE */}
           {activeSection === 'DATABASE' && (
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -375,10 +314,8 @@ export default function HeadAdminView({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 text-[10px] text-gray-400 uppercase tracking-wider">
-                      <th className="text-left px-4 py-3">USER DETAILS</th>
-                      <th className="text-left px-4 py-3">VUT ID</th>
-                      <th className="text-left px-4 py-3">ROLE</th>
-                      <th className="text-left px-4 py-3">ACTIONS</th>
+                      <th className="text-left px-4 py-3">USER DETAILS</th><th className="text-left px-4 py-3">VUT ID</th>
+                      <th className="text-left px-4 py-3">ROLE</th><th className="text-left px-4 py-3">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -401,9 +338,7 @@ export default function HeadAdminView({
                         </td>
                         <td className="px-4 py-3">
                           <button onClick={() => { setManageUser(u); setManageNewRole(u.role); }}
-                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-bold px-3 py-1 rounded-lg transition-colors">
-                            MANAGE
-                          </button>
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-bold px-3 py-1 rounded-lg transition-colors">MANAGE</button>
                         </td>
                       </tr>
                     ))}
@@ -413,7 +348,6 @@ export default function HeadAdminView({
             </div>
           )}
 
-          {/* ROOMS */}
           {activeSection === 'ROOMS' && !selectedRoomInfo && (
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -425,7 +359,7 @@ export default function HeadAdminView({
               </div>
               <div className="grid grid-cols-3 gap-4">
                 {(rooms.length > 0 ? rooms : ROOM_LIST.map((name, i) => ({ id: String(i), name, capacity: 10, allowedRoles: ['STUDENT', 'GUIDE', 'CEO'] as UserRole[] }))).map((room) => (
-                  <button key={room.id} onClick={() => setSelectedRoomInfo(room)}
+                  <button key={room.id ?? room.name} onClick={() => setSelectedRoomInfo(room as Room)}
                     className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow text-left">
                     <div className="h-28 bg-gradient-to-br from-purple-100 to-gray-100 flex items-center justify-center">
                       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -442,7 +376,6 @@ export default function HeadAdminView({
             </div>
           )}
 
-          {/* ROOM INFO */}
           {activeSection === 'ROOMS' && selectedRoomInfo && (
             <div className="p-6 max-w-lg">
               <div className="flex items-center justify-between mb-4">
@@ -476,7 +409,6 @@ export default function HeadAdminView({
         </div>
       </div>
 
-      {/* Manage Role Modal */}
       {manageUser && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
@@ -507,7 +439,6 @@ export default function HeadAdminView({
         </div>
       )}
 
-      {/* Add Room Modal */}
       {showAddRoom && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
@@ -541,9 +472,7 @@ export default function HeadAdminView({
               </div>
             </div>
             <button onClick={async () => { if (!newRoomName) return; await onAddRoom({ name: newRoomName, capacity: newRoomCapacity, allowedRoles: newRoomRoles }); setShowAddRoom(false); setNewRoomName(''); }}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-lg text-sm transition-colors">
-              CONFIRM
-            </button>
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-lg text-sm transition-colors">CONFIRM</button>
           </div>
         </div>
       )}
@@ -552,7 +481,6 @@ export default function HeadAdminView({
         <BookingModal user={user} rooms={ROOM_LIST} onClose={() => setShowBooking(false)}
           onConfirm={async (data) => { await onCreateReservation(data); setShowBooking(false); }} />
       )}
-
       {showProfile && (
         <ProfileModal user={user} onClose={() => setShowProfile(false)} onUpdate={onUpdateUser} />
       )}

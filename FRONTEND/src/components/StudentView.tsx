@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Reservation, ALL_ROOMS } from './types';
+import { User, Reservation, ALL_ROOMS, ReservationType } from './types';
 import BookingModal from './BookingModal';
 import MyReservationModal from './MyReservationModal';
 import ReservationModal from './ReservationModal';
@@ -16,6 +16,7 @@ interface StudentViewProps {
     startTime: string;
     endTime: string;
     description: string;
+    type?: ReservationType;
   }) => Promise<void>;
   onCancelReservation: (id: string) => Promise<void>;
   onUpdateUser: (updates: Partial<User>) => void;
@@ -74,26 +75,18 @@ export default function StudentView({
           <span className="bg-red-600 text-white font-black text-base px-2 py-1 rounded">T</span>
           <span className="bg-purple-600 text-white font-black text-base px-2 py-1 rounded">FP</span>
         </div>
-
         <div className="flex items-center gap-3">
-          {/* Bell + toggle */}
-                    <button
-            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-            className={`transition-colors ${notificationsEnabled ? 'text-gray-700' : 'text-gray-400'}`}
-          >
+          <button onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+            className={`transition-colors ${notificationsEnabled ? 'text-gray-700' : 'text-gray-400'}`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
             </svg>
           </button>
-
-          {/* User info */}
           <div className="text-right">
             <p className="text-sm font-semibold text-gray-800 leading-tight">{user.firstName} {user.lastName}</p>
             <p className="text-xs text-gray-500 leading-tight">{user.email}</p>
           </div>
-
-          {/* Avatar */}
           <button onClick={() => setShowProfile(true)}
             className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-purple-400 transition">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -104,13 +97,8 @@ export default function StudentView({
         </div>
       </div>
 
-      {/* MAIN LAYOUT */}
       <div className="flex flex-1 overflow-hidden">
-
-        {/* LEFT */}
         <div className="flex-1 flex flex-col overflow-hidden">
-
-          {/* Watermark */}
           <div className="relative px-5 pt-2 pb-0 overflow-hidden select-none pointer-events-none">
             <span className={`block font-black uppercase leading-none ${watermarkInfo.color}`}
               style={{ fontSize: 'clamp(90px, 17vw, 180px)', opacity: 0.35, letterSpacing: '0.02em' }}>
@@ -118,7 +106,6 @@ export default function StudentView({
             </span>
           </div>
 
-          {/* SELECT ROOM */}
           <div className="px-5 -mt-4 relative z-10">
             <div className="relative inline-block">
               <button onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
@@ -139,7 +126,6 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* Calendar card */}
           <div className="px-5 pt-3 pb-5 flex-1 flex flex-col">
             <div className="bg-white rounded-2xl shadow-md border border-gray-200 flex-1 flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
@@ -164,9 +150,7 @@ export default function StudentView({
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR */}
         <div className="w-64 flex flex-col gap-3 p-4 shrink-0">
-
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
             <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center">RULES</p>
           </div>
@@ -210,7 +194,6 @@ export default function StudentView({
         </div>
       </div>
 
-      {/* MODALS */}
       {showBooking && (
         <BookingModal user={user} onClose={() => setShowBooking(false)}
           onConfirm={async (data) => { await onCreateReservation(data); setShowBooking(false); }} />

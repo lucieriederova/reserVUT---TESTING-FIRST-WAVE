@@ -19,6 +19,7 @@ export default function App() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loginError, setLoginError] = useState('');
   const [loading, setLoading] = useState(true);
+
   const getMockUser = (email: string, role: UserRole, firstName?: string, lastName?: string): User => {
     const match = MOCK_USERS.find((user) => user.email === email && user.role === role);
     if (match) {
@@ -39,6 +40,7 @@ export default function App() {
       avatarIndex: 0,
     };
   };
+
   const syncMockUsersList = (role: UserRole) => {
     if (role === 'HEAD_ADMIN') {
       setAllUsers(MOCK_USERS);
@@ -71,7 +73,6 @@ export default function App() {
     try {
       const data = await getReservations();
       const list = Array.isArray(data) ? data : data.reservations ?? [];
-      // Normalize status to lowercase
       setReservations(
         list.map((r: Reservation) => ({
           ...r,
@@ -119,7 +120,7 @@ export default function App() {
         }
       );
       backendUser = {
-        id: data.user.id,
+        id: res.user?.id ?? data.user.id,
         email: data.user.email!,
         firstName: res.user?.firstName ?? data.user.user_metadata?.first_name ?? '',
         lastName: res.user?.lastName ?? data.user.user_metadata?.last_name ?? '',
@@ -178,13 +179,13 @@ export default function App() {
     setScreen('login');
   };
 
-  const handleCreateReservation = async (data: {
-    roomName: string;
-    startTime: string;
-    endTime: string;
-    description: string;
-    type: ReservationType;
-  }) => {
+    const handleCreateReservation = async (data: {
+      roomName: string;
+      startTime: string;
+      endTime: string;
+      description: string;
+      type?: ReservationType;
+    }) => {
     if (!currentUser) return;
     if (USE_MOCK_API) {
       const newReservation: Reservation = {
@@ -209,7 +210,6 @@ export default function App() {
     });
     const created = newRes.reservation ?? newRes;
     setReservations((prev) => [...prev, { ...created, status: 'active' as const }]);
-    // Also mark preempted ones
     if (newRes.preempted?.length) {
       setReservations((prev) =>
         prev.map((r) =>
