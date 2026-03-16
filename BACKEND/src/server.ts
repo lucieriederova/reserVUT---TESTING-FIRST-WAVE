@@ -6,20 +6,21 @@ import roomPolicyRoutes from './routes/roomPolicyRoutes.js';
  
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5001;
-const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
  
-// ── Middleware ────────────────────────────────────────────────────────────────
- 
-app.use(cors());
-app.options('*', cors());
- 
-app.use(express.json());
- 
-// Request logger
-app.use((req, _res, next) => {
-  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+// ── CORS — manual headers ─────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
   next();
 });
+ 
+app.use(cors({ origin: '*' }));
+app.use(express.json());
  
 // ── Routes ───────────────────────────────────────────────────────────────────
  
@@ -47,7 +48,6 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
  
 app.listen(PORT, () => {
   console.log(`🚀 reserVUT backend running on http://localhost:${PORT}`);
-  console.log(`   FRONTEND_URL: ${FRONTEND_URL}`);
   console.log(`   DB: ${process.env.DATABASE_URL ? '✅ configured' : '⚠️  not set — using in-memory store'}`);
 });
  
