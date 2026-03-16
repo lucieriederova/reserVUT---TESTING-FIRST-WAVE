@@ -67,10 +67,10 @@ export default function StudentView({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
 
       {/* TOP NAVBAR */}
-      <div className="bg-white border-b border-gray-200 px-5 py-2 flex items-center justify-between">
+      <div className="bg-gray-100 border-b border-gray-200 px-5 py-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
           <span className="bg-red-600 text-white font-black text-base px-2 py-1 rounded">T</span>
           <span className="bg-purple-600 text-white font-black text-base px-2 py-1 rounded">FP</span>
@@ -144,6 +144,8 @@ export default function StudentView({
                   weekOffset={currentWeekOffset}
                   onReservationClick={handleCalendarClick}
                   currentUserId={user.id}
+                  startHour={7}
+                  endHour={21}
                 />
               </div>
             </div>
@@ -153,7 +155,7 @@ export default function StudentView({
         {/* RIGHT SIDEBAR */}
         <div className="w-64 flex flex-col gap-3 p-4 shrink-0">
 
-          {/* RULES - role specific */}
+          {/* RULES */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
             <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center mb-3">RULES</p>
             {user.role === 'STUDENT' && (
