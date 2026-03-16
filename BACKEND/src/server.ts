@@ -10,23 +10,8 @@ const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
  
 // ── Middleware ────────────────────────────────────────────────────────────────
  
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (
-        origin.includes('vercel.app') ||
-        origin.includes('localhost')
-      ) {
-        return callback(null, true);
-      }
-      callback(new Error('Not allowed by CORS'));
-    },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
+app.use(cors());
+app.options('*', cors());
  
 app.use(express.json());
  
