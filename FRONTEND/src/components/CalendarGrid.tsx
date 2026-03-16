@@ -45,6 +45,17 @@ export default function CalendarGrid({
     });
   };
 
+  const getReservationColor = (r: Reservation) => {
+    // HEAD_ADMIN = priority 4 = blue
+    // GUIDE = priority 3 = purple
+    // CEO = priority 2 = orange
+    // STUDENT = priority 1 = pink
+    if (r.priorityLevel === 4) return 'bg-blue-500 text-white';
+    if (r.priorityLevel === 3) return 'bg-purple-500 text-white';
+    if (r.priorityLevel === 2) return 'bg-orange-400 text-white';
+    return 'bg-pink-400 text-white';
+  };
+
   return (
     <div className="overflow-auto h-full">
       <div className="grid" style={{ gridTemplateColumns: '48px repeat(7, 1fr)', minWidth: '600px' }}>
@@ -88,11 +99,7 @@ export default function CalendarGrid({
                     <button
                       key={r.id}
                       onClick={() => onReservationClick(r)}
-                      className={`absolute inset-x-0.5 top-0.5 bottom-0.5 rounded text-[9px] font-semibold px-1 truncate text-left transition-opacity hover:opacity-80 ${
-                        r.userId === currentUserId
-                          ? 'bg-purple-500 text-white'
-                          : 'bg-blue-300 text-blue-900'
-                      }`}
+                      className={`absolute inset-x-0.5 top-0.5 bottom-0.5 rounded text-[9px] font-semibold px-1 truncate text-left transition-opacity hover:opacity-80 ${getReservationColor(r)}`}
                       title={`${r.roomName} — ${r.description ?? ''}`}
                     >
                       {r.roomName}

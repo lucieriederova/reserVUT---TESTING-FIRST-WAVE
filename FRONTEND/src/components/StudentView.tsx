@@ -150,11 +150,33 @@ export default function StudentView({
           </div>
         </div>
 
+        {/* RIGHT SIDEBAR */}
         <div className="w-64 flex flex-col gap-3 p-4 shrink-0">
+
+          {/* RULES */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
-            <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center">RULES</p>
+            <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center mb-3">RULES</p>
+            <div className="space-y-2">
+              <div>
+                <p className="text-[10px] font-black uppercase text-pink-500 mb-0.5">Student</p>
+                <p className="text-[9px] text-gray-500 leading-tight">Max 5 days ahead, 2 bookings/week, max 2h/booking, min 15min. No simultaneous bookings.</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase text-orange-400 mb-0.5">Leader</p>
+                <p className="text-[9px] text-gray-500 leading-tight">Max 5 days ahead, min 24h before. Multiple rooms allowed. Requires verification.</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase text-purple-500 mb-0.5">Guide</p>
+                <p className="text-[9px] text-gray-500 leading-tight">Sessions min 2 days ahead. Can override lower roles. Multiple rooms. Requires verification.</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase text-blue-500 mb-0.5">Head Admin</p>
+                <p className="text-[9px] text-gray-500 leading-tight">No limits. Can override any booking. Events &gt; Session &gt; Others.</p>
+              </div>
+            </div>
           </div>
 
+          {/* UPCOMING */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex-1">
             <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center mb-3">UPCOMING</p>
             <div className="space-y-2">
@@ -169,6 +191,7 @@ export default function StudentView({
             </div>
           </div>
 
+          {/* CANCELLED */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex-1">
             <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center mb-3">CANCLED</p>
             <div className="space-y-2">

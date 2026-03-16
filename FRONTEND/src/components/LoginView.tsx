@@ -38,15 +38,24 @@ export default function LoginView({ onLogin, onShowSignUp, error }: LoginViewPro
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* reserVUT badge top right */}
-      <div className="absolute top-4 right-4">
-        <span className="bg-purple-600 text-white text-sm font-bold px-4 py-2 rounded-full">
-    reserVUT
-  </span>
+      {/* reserVUT badge + info top right */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <span className="bg-purple-600 text-white text-2xl font-bold px-6 py-3 rounded-full">
+          reserVUT
+        </span>
+        <div className="relative group">
+          <div className="w-6 h-6 rounded-full bg-gray-300 text-gray-600 text-xs font-bold flex items-center justify-center cursor-pointer hover:bg-purple-200">
+            i
+          </div>
+          <div className="absolute right-0 top-8 w-64 bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-xs text-gray-600 hidden group-hover:block z-50">
+            <p className="font-bold text-gray-800 mb-1">reserVUT</p>
+            <p>Rezervační systém pro fakultu. Umožňuje studentům, průvodcům a vedoucím rezervovat místnosti pro různé účely.</p>
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg w-full max-w-xl p-10">
+        <div className="bg-white rounded-2xl shadow-lg w-full max-w-xl p-10">
           {/* Logo */}
           <div className="flex justify-center mb-2">
             <div className="flex items-center gap-1">
@@ -59,23 +68,23 @@ export default function LoginView({ onLogin, onShowSignUp, error }: LoginViewPro
 
           {/* Role selector */}
           <div className="flex justify-center gap-3 mb-6">
-          {ROLE_OPTIONS.map(({ role, label, icon }) => (
-            <button
-              key={role}
-              onClick={() => handleRoleSelect(role)}
-              className={`flex flex-col items-center justify-center gap-1 w-20 h-20 rounded-lg transition-all ${
-                selectedRole === role
-                  ? 'bg-purple-100 ring-2 ring-purple-500'
-                  : 'bg-gray-50 hover:bg-gray-100'
-              }`}
-            >
-              <span className="text-2xl">{icon}</span>
-              <span className="text-[9px] font-semibold text-gray-600 text-center leading-tight max-w-[48px]">
-                {label}
-              </span>
-            </button>
-          ))}
-        </div>
+            {ROLE_OPTIONS.map(({ role, label, icon }) => (
+              <button
+                key={role}
+                onClick={() => handleRoleSelect(role)}
+                className={`flex flex-col items-center justify-center gap-1 w-20 h-20 rounded-lg transition-all ${
+                  selectedRole === role
+                    ? 'bg-purple-100 ring-2 ring-purple-500'
+                    : 'bg-gray-50 hover:bg-gray-100'
+                }`}
+              >
+                <span className="text-2xl">{icon}</span>
+                <span className="text-[9px] font-semibold text-gray-600 text-center leading-tight max-w-[48px]">
+                  {label}
+                </span>
+              </button>
+            ))}
+          </div>
 
           {/* Email */}
           <div className="mb-3">
