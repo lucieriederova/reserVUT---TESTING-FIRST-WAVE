@@ -47,6 +47,29 @@ export default function StudentView({
     return 'from-pink-500 to-pink-300';
   })();
 
+  const rulesContent = (() => {
+    if (user.role === 'CEO') return {
+      label: 'Leader',
+      color: 'text-orange-400',
+      text: 'Max 5 days ahead, min 24h before booking. Multiple rooms allowed. Requires Head Admin verification.',
+    };
+    if (user.role === 'GUIDE') return {
+      label: 'Guide',
+      color: 'text-purple-500',
+      text: 'Sessions must be booked min 2 days ahead. Can override lower roles. Multiple rooms. Requires verification.',
+    };
+    if (user.role === 'HEAD_ADMIN') return {
+      label: 'Head Admin',
+      color: 'text-blue-500',
+      text: 'No limits. Can override any booking. Priority: Events > Session > Others. Multiple rooms allowed.',
+    };
+    return {
+      label: 'Student',
+      color: 'text-pink-500',
+      text: 'Max 5 days ahead. Max 2 bookings per week. Max 2h per booking, min 15 min. No simultaneous bookings.',
+    };
+  })();
+
   const myReservations = reservations.filter((r) => r.userId === user.id && r.status === 'active');
   const upcomingReservations = myReservations.filter((r) => new Date(r.startTime) >= new Date());
   const cancelledReservations = reservations.filter((r) => r.userId === user.id && r.status !== 'active');
@@ -99,14 +122,26 @@ export default function StudentView({
 
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="relative px-5 pt-2 pb-0 overflow-hidden select-none pointer-events-none">
-            <span className={`block font-black uppercase leading-none ${watermarkInfo.color}`}
-              style={{ fontSize: 'clamp(90px, 17vw, 180px)', opacity: 0.35, letterSpacing: '0.02em' }}>
-              {watermarkInfo.text}
-            </span>
+
+          {/* Watermark + RULES side by side */}
+          <div className="relative px-5 pt-2 pb-0 flex items-center overflow-hidden">
+            {/* Watermark */}
+            <div className="select-none pointer-events-none flex-shrink-0">
+              <span className={`block font-black uppercase leading-none ${watermarkInfo.color}`}
+                style={{ fontSize: 'clamp(70px, 13vw, 140px)', opacity: 0.35, letterSpacing: '0.02em' }}>
+                {watermarkInfo.text}
+              </span>
+            </div>
+            {/* RULES */}
+            <div className="ml-6 flex-1 max-w-sm">
+              <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">RULES</p>
+              <p className={`text-base font-black uppercase mb-1 ${rulesContent.color}`}>{rulesContent.label}</p>
+              <p className="text-sm text-gray-500 leading-relaxed">{rulesContent.text}</p>
+            </div>
           </div>
 
-          <div className="px-5 -mt-4 relative z-10">
+          {/* SELECT ROOM */}
+          <div className="px-5 mt-2 relative z-10">
             <div className="relative inline-block">
               <button onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
                 className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 min-w-[180px] justify-between">
@@ -126,6 +161,7 @@ export default function StudentView({
             </div>
           </div>
 
+          {/* Calendar */}
           <div className="px-5 pt-3 pb-5 flex-1 flex flex-col">
             <div className="bg-white rounded-2xl shadow-md border border-gray-200 flex-1 flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
@@ -154,35 +190,6 @@ export default function StudentView({
 
         {/* RIGHT SIDEBAR */}
         <div className="w-64 flex flex-col gap-3 p-4 shrink-0">
-
-          {/* RULES */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4">
-            <p className="text-sm font-black uppercase tracking-widest text-gray-900 text-center mb-3">RULES</p>
-            {user.role === 'STUDENT' && (
-              <div>
-                <p className="text-[10px] font-black uppercase text-pink-500 mb-0.5">Student</p>
-                <p className="text-[9px] text-gray-500 leading-tight">Max 5 days ahead, 2 bookings/week, max 2h/booking, min 15min. No simultaneous bookings.</p>
-              </div>
-            )}
-            {user.role === 'CEO' && (
-              <div>
-                <p className="text-[10px] font-black uppercase text-orange-400 mb-0.5">Leader</p>
-                <p className="text-[9px] text-gray-500 leading-tight">Max 5 days ahead, min 24h before. Multiple rooms allowed. Requires verification.</p>
-              </div>
-            )}
-            {user.role === 'GUIDE' && (
-              <div>
-                <p className="text-[10px] font-black uppercase text-purple-500 mb-0.5">Guide</p>
-                <p className="text-[9px] text-gray-500 leading-tight">Sessions min 2 days ahead. Can override lower roles. Multiple rooms. Requires verification.</p>
-              </div>
-            )}
-            {user.role === 'HEAD_ADMIN' && (
-              <div>
-                <p className="text-[10px] font-black uppercase text-blue-500 mb-0.5">Head Admin</p>
-                <p className="text-[9px] text-gray-500 leading-tight">No limits. Can override any booking. Events &gt; Session &gt; Others.</p>
-              </div>
-            )}
-          </div>
 
           {/* UPCOMING */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-5 py-4 flex-1">
