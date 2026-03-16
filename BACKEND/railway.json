@@ -1,0 +1,1 @@
+{"deploy":{"startCommand":"npx tsx src/server.ts"}}
