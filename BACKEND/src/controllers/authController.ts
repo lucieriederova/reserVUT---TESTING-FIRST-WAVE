@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import * as mem from '../services/memoryStore.js';
+import { sendWelcomeEmail } from '../services/emailService.js';
  
 type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
  
@@ -65,12 +66,14 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
     try {
       const existing = await db.user.findUnique({ where: { supabaseId: supabaseUserId } });
       if (existing) {
+        // Only force-set isVerified for STUDENT/HEAD_ADMIN; don't reset verified CEO/GUIDE
+        const verifiedUpdate = AUTO_VERIFIED.includes(role) ? { isVerified: true } : {};
         const updated = await db.user.update({
           where: { supabaseId: supabaseUserId },
           data: {
             role: role as any,
             email,
-            isVerified: AUTO_VERIFIED.includes(role),
+            ...verifiedUpdate,
             ...(firstName && { firstName }),
             ...(lastName && { lastName }),
           },
@@ -89,6 +92,8 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
           },
         });
         res.status(201).json({ user: created, created: true });
+        // Send welcome email asynchronously — don't block response
+        sendWelcomeEmail(email, firstName ?? email.split('@')[0]).catch(console.error);
       }
       return;
     } catch (e) {
@@ -96,8 +101,12 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
     }
   }
  
+  const isNew = !mem.findUserBySupabaseId(supabaseUserId);
   const user = mem.upsertUser({ supabaseId: supabaseUserId, email, role, firstName, lastName });
-  res.json({ user, created: false });
+  if (isNew) {
+    sendWelcomeEmail(email, firstName ?? email.split('@')[0]).catch(console.error);
+  }
+  res.json({ user, created: isNew });
 }
  
 export async function getUsers(_req: Request, res: Response): Promise<void> {

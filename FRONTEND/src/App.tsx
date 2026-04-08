@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { syncLogin, getReservations, createReservation, cancelReservation, getAllUsers, updateUserRole, verifyUser } from './lib/api';
 import { MOCK_RESERVATIONS, MOCK_USERS } from './lib/mockData';
@@ -19,6 +19,7 @@ export default function App() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loginError, setLoginError] = useState('');
   const [loading, setLoading] = useState(true);
+  const cancelledIds = useRef<Set<string>>(new Set());
 
   const getMockUser = (email: string, role: UserRole, firstName?: string, lastName?: string): User => {
     const match = MOCK_USERS.find((user) => user.email === email && user.role === role);
@@ -56,7 +57,7 @@ export default function App() {
         const user = JSON.parse(stored) as User;
         setCurrentUser(user);
         setScreen('app');
-        fetchReservations();
+        fetchReservations(cancelledIds.current);
         if (user.role === 'HEAD_ADMIN') fetchAllUsers();
       } catch {
         localStorage.removeItem(USER_STORAGE_KEY);
@@ -65,7 +66,7 @@ export default function App() {
     setLoading(false);
   }, []);
 
-  const fetchReservations = async () => {
+  const fetchReservations = async (cancelledIds?: Set<string>) => {
     if (USE_MOCK_API) {
       setReservations(MOCK_RESERVATIONS);
       return;
@@ -74,10 +75,17 @@ export default function App() {
       const data = await getReservations();
       const list = Array.isArray(data) ? data : data.reservations ?? [];
       setReservations(
-        list.map((r: Reservation) => ({
-          ...r,
-          status: (r.status as string).toLowerCase() as Reservation['status'],
-        }))
+        list.map((r: Reservation) => {
+          const normalized = {
+            ...r,
+            status: (r.status as string).toLowerCase() as Reservation['status'],
+          };
+          // Keep local cancelled state — don't let server overwrite it
+          if (cancelledIds?.has(r.id)) {
+            normalized.status = 'cancelled';
+          }
+          return normalized;
+        })
       );
     } catch {
       /* backend offline */
@@ -92,7 +100,7 @@ export default function App() {
     try {
       const data = await getAllUsers();
       setAllUsers(Array.isArray(data) ? data : data.users ?? []);
-    } catch {}
+    } catch { /* ignore */ }
   };
 
   const handleLogin = async (email: string, password: string, role: UserRole) => {
@@ -164,7 +172,7 @@ export default function App() {
         firstName: formData.firstName,
         lastName: formData.lastName,
       });
-    } catch {}
+    } catch { /* ignore */ }
     setScreen('login');
   };
 
@@ -194,7 +202,7 @@ export default function App() {
         startTime: data.startTime,
         endTime: data.endTime,
         description: data.description,
-        type: data.type,
+        type: data.type ?? 'MEETING',
         userId: currentUser.id,
         userName: `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim(),
         priorityLevel: PRIORITY_MAP[currentUser.role],
@@ -203,17 +211,23 @@ export default function App() {
       setReservations((prev) => [...prev, newReservation]);
       return;
     }
+    // Let errors propagate up to BookingModal so it can display them
     const newRes = await createReservation({
       ...data,
       userId: currentUser.id,
       priorityLevel: PRIORITY_MAP[currentUser.role],
     });
     const created = newRes.reservation ?? newRes;
-    setReservations((prev) => [...prev, { ...created, status: 'active' as const }]);
+    setReservations((prev) => [
+      ...prev,
+      { ...created, status: 'active' as const },
+    ]);
     if (newRes.preempted?.length) {
       setReservations((prev) =>
         prev.map((r) =>
-          newRes.preempted.some((p: Reservation) => p.id === r.id) ? { ...r, status: 'preempted' as const } : r
+          newRes.preempted.some((p: Reservation) => p.id === r.id)
+            ? { ...r, status: 'preempted' as const }
+            : r
         )
       );
     }
@@ -222,6 +236,7 @@ export default function App() {
   const handleCancelReservation = async (id: string) => {
     if (!currentUser) return;
     if (USE_MOCK_API) {
+      cancelledIds.current.add(id);
       setReservations((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status: 'cancelled' as const } : r))
       );
@@ -229,7 +244,8 @@ export default function App() {
     }
     try {
       await cancelReservation(id, currentUser.id, currentUser.role);
-    } catch {}
+    } catch { /* ignore */ }
+    cancelledIds.current.add(id);
     setReservations((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status: 'cancelled' as const } : r))
     );

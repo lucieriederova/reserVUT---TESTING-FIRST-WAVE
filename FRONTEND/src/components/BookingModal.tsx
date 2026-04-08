@@ -35,16 +35,15 @@ const TYPE_LABELS: Record<ReservationType, string> = {
   SESSION: 'Session',
   WORKSHOP: 'Workshop',
   PITCHDECK: 'Pitchdeck',
-  EVENT: 'Event (Global)',
+  EVENT: 'Event',
+  GLOBAL_EVENT: 'Global Event',
   OTHER: 'Other',
 };
 
-function getLocalTimezone(): string {
-  const tzOffset = -new Date().getTimezoneOffset();
-  const tzHours = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, '0');
-  const tzMins = String(Math.abs(tzOffset) % 60).padStart(2, '0');
-  const tzSign = tzOffset >= 0 ? '+' : '-';
-  return `${tzSign}${tzHours}:${tzMins}`;
+function localDateTimeToISO(date: string, time: string): string {
+  // Build a Date from local date+time (no timezone suffix = local), then emit UTC ISO
+  const local = new Date(`${date}T${time}:00`);
+  return local.toISOString();
 }
 
 function isTimeInPast(date: string, time: string): boolean {
@@ -65,6 +64,8 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
   const [endTime, setEndTime] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [conflictDetail, setConflictDetail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -83,21 +84,31 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
   });
 
   const handleConfirm = async () => {
+    setSubmitted(true);
     if (!room || !startTime || !endTime) { setError('Please fill all required fields.'); return; }
     if (isTimeInPast(selectedDate, startTime)) { setError('Cannot book a time slot in the past.'); return; }
     setError('');
+    setConflictDetail('');
     setLoading(true);
     try {
-      const tz = getLocalTimezone();
       await onConfirm({
         roomName: room,
-        startTime: `${selectedDate}T${startTime}:00${tz}`,
-        endTime: `${selectedDate}T${endTime}:00${tz}`,
+        startTime: localDateTimeToISO(selectedDate, startTime),
+        endTime: localDateTimeToISO(selectedDate, endTime),
         description,
         type,
       });
     } catch (e: unknown) {
-      const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      const resData = (e as { response?: { data?: { error?: string; conflicting?: Array<{ roomName: string; startTime: string; endTime: string }> } } })?.response?.data;
+      const msg = resData?.error;
+      const conflicting = resData?.conflicting;
+      if (conflicting?.length) {
+        const c = conflicting[0];
+        const s = new Date(c.startTime);
+        const en = new Date(c.endTime);
+        const fmt = (d: Date) => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        setConflictDetail(`${c.roomName} · ${fmt(s)}–${fmt(en)}`);
+      }
       setError(msg ?? (e instanceof Error ? e.message : 'Failed to create reservation'));
     } finally {
       setLoading(false);
@@ -139,7 +150,7 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
             Room <span className="text-red-400">*</span>
           </label>
           <select value={room} onChange={(e) => setRoom(e.target.value)}
-            className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 ${!room ? 'border-gray-200' : 'border-purple-300'}`}>
+            className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 ${submitted && !room ? 'border-red-400 ring-1 ring-red-300' : room ? 'border-purple-300' : 'border-gray-200'}`}>
             <option value="">SELECT ROOM</option>
             {rooms.map((r) => <option key={r} value={r}>{r}</option>)}
           </select>
@@ -165,7 +176,8 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
             min={today}
             max={maxDate()}
             onChange={(e) => { setSelectedDate(e.target.value); setStartTime(''); setEndTime(''); }}
-            className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 cursor-pointer"
+            className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 cursor-pointer box-border"
+            style={{ WebkitAppearance: 'none', maxWidth: '100%' }}
           />
         </div>
 
@@ -176,7 +188,7 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
               Start <span className="text-red-400">*</span>
             </label>
             <select value={startTime} onChange={(e) => { setStartTime(e.target.value); setEndTime(''); }}
-              className="w-full border border-gray-200 rounded px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+              className={`w-full border rounded px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 ${submitted && !startTime ? 'border-red-400 ring-1 ring-red-300' : 'border-gray-200'}`}>
               <option value="">--:--</option>
               {availableStartSlots.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
@@ -186,7 +198,7 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
               End <span className="text-red-400">*</span>
             </label>
             <select value={endTime} onChange={(e) => setEndTime(e.target.value)} disabled={!startTime}
-              className="w-full border border-gray-200 rounded px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-50">
+              className={`w-full border rounded px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-50 ${submitted && !endTime ? 'border-red-400 ring-1 ring-red-300' : 'border-gray-200'}`}>
               <option value="">--:--</option>
               {startTime && getEndSlots(startTime, maxDuration).map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
@@ -197,18 +209,42 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
           Min 15 min · Max {maxDuration === 150 ? '2h 30min' : '3h'} · 15-min blocks
         </p>
 
-        {error && <p className="text-red-500 text-xs mb-3">{error}</p>}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">
+            <p className="text-red-600 text-xs font-semibold">
+              {error.includes('Conflict') || error.includes('CONFLICT')
+                ? `⚠️ Time slot conflict — this room is already booked at that time.${conflictDetail ? ` (${conflictDetail})` : ''}`
+                : error.includes('WEEKLY_LIMIT') || error.includes('2 reservations')
+                ? '⚠️ Weekly limit reached — students can only make 2 bookings per week.'
+                : error.includes('SIMULTANEOUS')
+                ? '⚠️ You already have a booking in another room at this time.'
+                : error.includes('PAST_TIME') || error.includes('past')
+                ? '⚠️ Cannot book a time in the past.'
+                : error.includes('verified') || error.includes('NOT_VERIFIED')
+                ? '⚠️ Your account needs Head Admin verification before booking.'
+                : `⚠️ ${error}`}
+            </p>
+          </div>
+        )}
 
         <button
           onClick={handleConfirm}
           disabled={loading || !allFieldsFilled || (!user.isVerified && (user.role === 'CEO' || user.role === 'GUIDE'))}
-          className={`w-full font-bold py-2.5 rounded-lg text-sm transition-colors text-white ${
+          className={`w-full font-bold py-2.5 rounded-lg text-sm transition-all text-white ${
             allFieldsFilled && (user.isVerified || (user.role !== 'CEO' && user.role !== 'GUIDE'))
-              ? 'bg-purple-600 hover:bg-purple-700'
-              : 'bg-gray-300 cursor-not-allowed'
+              ? 'bg-emerald-600 hover:bg-emerald-700 shadow-sm'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >
-          {loading ? 'CONFIRMING...' : 'CONFIRM SESSION'}
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              </svg>
+              CONFIRMING...
+            </span>
+          ) : !allFieldsFilled ? 'FILL ALL FIELDS TO CONFIRM' : 'CONFIRM SESSION'}
         </button>
       </div>
     </div>

@@ -4,9 +4,14 @@ import * as mem from '../services/memoryStore.js';
 import { validateReservation } from '../services/memoryStore.js';
 import { getEffectivePriority } from '../services/priorityEngine.js';
 import { canRoleBookRoom } from '../services/roomPolicyStore.js';
+import {
+  sendReservationConfirmation,
+  sendCancellationEmail,
+  sendPreemptionEmail,
+} from '../services/emailService.js';
  
 type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
-type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'OTHER';
+type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'GLOBAL_EVENT' | 'OTHER';
  
 let prisma: PrismaClient | null = null;
 let dbAvailable = false;
@@ -25,7 +30,7 @@ async function getDb(): Promise<PrismaClient | null> {
   }
 }
  
-const VALID_TYPES: ReservationType[] = ['MEETING', 'SESSION', 'WORKSHOP', 'PITCHDECK', 'EVENT', 'OTHER'];
+const VALID_TYPES: ReservationType[] = ['MEETING', 'SESSION', 'WORKSHOP', 'PITCHDECK', 'EVENT', 'GLOBAL_EVENT', 'OTHER'];
  
 function resolveType(raw?: string): ReservationType {
   if (!raw) return 'MEETING';
@@ -110,6 +115,44 @@ export async function createReservation(req: Request, res: Response): Promise<vo
  
   if (db) {
     try {
+      // Block past reservations
+      if (start <= new Date()) {
+        res.status(422).json({ error: 'Cannot create a reservation in the past.', code: 'PAST_TIME' });
+        return;
+      }
+ 
+      // Student: max 2 bookings per week (DB path)
+      if (userRole === 'STUDENT') {
+        const weekStart = new Date(start);
+        weekStart.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+        weekStart.setHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 7);
+        const weekCount = await db.reservation.count({
+          where: { userId, status: 'ACTIVE', startTime: { gte: weekStart, lt: weekEnd } },
+        });
+        if (weekCount >= 2) {
+          res.status(422).json({ error: 'Students can only make 2 reservations per week.', code: 'WEEKLY_LIMIT' });
+          return;
+        }
+      }
+ 
+      // Simultaneous rooms check (STUDENT: max 1, CEO: max 2)
+      const maxSimultaneous: Record<Role, number> = { STUDENT: 1, CEO: 3, GUIDE: Infinity, HEAD_ADMIN: Infinity };
+      const maxSimult = maxSimultaneous[userRole];
+      if (maxSimult !== Infinity) {
+        const simultCount = await db.reservation.count({
+          where: { userId, status: 'ACTIVE', startTime: { lt: end }, endTime: { gt: start } },
+        });
+        if (simultCount >= maxSimult) {
+          res.status(422).json({
+            error: `${userRole} can only hold ${maxSimult} room(s) at the same time.`,
+            code: 'SIMULTANEOUS_LIMIT',
+          });
+          return;
+        }
+      }
+ 
       const overlapping = await db.reservation.findMany({
         where: { roomName, status: 'ACTIVE', startTime: { lt: end }, endTime: { gt: start } },
       });
@@ -144,6 +187,39 @@ export async function createReservation(req: Request, res: Response): Promise<vo
         } as any,
       });
       res.status(201).json({ reservation, preempted: overlapping });
+ 
+      // Send emails asynchronously after response
+      ;(async () => {
+        try {
+          const creator = await db.user.findUnique({ where: { id: userId }, select: { email: true, firstName: true } });
+          if (creator) {
+            await sendReservationConfirmation({
+              to: creator.email,
+              firstName: creator.firstName ?? 'there',
+              roomName,
+              startTime: start.toISOString(),
+              endTime: end.toISOString(),
+              description,
+              type,
+            });
+          }
+          // Notify preempted users
+          for (const preempted of overlapping) {
+            const victim = await db.user.findUnique({ where: { id: (preempted as any).userId }, select: { email: true, firstName: true, role: true } });
+            if (victim) {
+              await sendPreemptionEmail({
+                to: victim.email,
+                firstName: victim.firstName ?? 'there',
+                roomName,
+                startTime: (preempted as any).startTime?.toISOString?.() ?? startTime,
+                preemptedByRole: userRole,
+              });
+            }
+          }
+        } catch (emailErr) {
+          console.error('Email send failed (non-fatal):', emailErr);
+        }
+      })();
       return;
     } catch (e) { console.error('createReservation DB error:', e); }
   }
@@ -155,6 +231,28 @@ export async function createReservation(req: Request, res: Response): Promise<vo
       userName: memUser ? `${memUser.firstName ?? ''} ${memUser.lastName ?? ''}`.trim() || memUser.email : undefined,
     });
     res.status(201).json(result);
+ 
+    // Send emails async (non-fatal)
+    if (memUser) {
+      sendReservationConfirmation({
+        to: memUser.email,
+        firstName: memUser.firstName ?? 'there',
+        roomName, startTime, endTime, description, type,
+      }).catch(console.error);
+      // Notify preempted
+      for (const p of result.preempted ?? []) {
+        const victim = mem.findUserById(p.userId);
+        if (victim) {
+          sendPreemptionEmail({
+            to: victim.email,
+            firstName: victim.firstName ?? 'there',
+            roomName,
+            startTime: p.startTime,
+            preemptedByRole: userRole,
+          }).catch(console.error);
+        }
+      }
+    }
   } catch (e: any) {
     if (e.code === 'CONFLICT') res.status(409).json({ error: e.message, code: 'CONFLICT' });
     else res.status(422).json({ error: e.message ?? 'Reservation failed' });
@@ -185,6 +283,23 @@ export async function deleteReservation(req: Request, res: Response): Promise<vo
   try {
     const cancelled = mem.cancelReservation(reservationId, userId, userRole ?? 'STUDENT');
     res.json({ reservation: cancelled });
+    // Send cancellation email (non-fatal)
+    ;(async () => {
+      try {
+        const victim = mem.findUserById(cancelled.userId);
+        if (victim) {
+          await sendCancellationEmail({
+            to: victim.email,
+            firstName: victim.firstName ?? 'there',
+            roomName: cancelled.roomName,
+            startTime: cancelled.startTime,
+            cancelledBy: userId !== cancelled.userId ? 'HEAD_ADMIN' : undefined,
+          });
+        }
+      } catch (emailErr) {
+        console.error('Cancellation email failed (non-fatal):', emailErr);
+      }
+    })();
   } catch (e: any) {
     const status = e.code === 'NOT_FOUND' ? 404 : e.code === 'FORBIDDEN' ? 403 : 500;
     res.status(status).json({ error: e.message });

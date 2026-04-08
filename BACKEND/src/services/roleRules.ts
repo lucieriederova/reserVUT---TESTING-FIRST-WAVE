@@ -14,7 +14,7 @@ export interface RoleRule {
 export const ROLE_RULES: Record<Role, RoleRule> = {
   STUDENT: {
     displayName: 'Student',
-    allowedRooms: ['Meeting Room', 'Aquarium', 'Panda Room', 'Session', 'P159'],
+    allowedRooms: ['Meeting Room', 'Panda Room', 'Session Room', 'P159'],
     maxDaysAhead: 5,
     bookingLimit: { count: 2, windowDays: 7 },
     allowConcurrent: false,
@@ -22,7 +22,7 @@ export const ROLE_RULES: Record<Role, RoleRule> = {
   },
   CEO: {
     displayName: 'Leader',
-    allowedRooms: ['Panda Room', 'Meeting Room', 'Session', 'Aquarium', 'The Stage', 'P159'],
+    allowedRooms: ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room'],
     maxDaysAhead: 5,
     minLeadHours: 24,
     bookingLimit: { count: 2, windowDays: 1 },
@@ -32,7 +32,7 @@ export const ROLE_RULES: Record<Role, RoleRule> = {
   },
   GUIDE: {
     displayName: 'Guide',
-    allowedRooms: ['Panda Room', 'Session', 'Aquarium', 'The Stage', 'P159', 'Meeting Room'],
+    allowedRooms: ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room'],
     maxDaysAhead: 365,
     minLeadHours: 24,
     bookingLimit: { count: 99, windowDays: 365 },
@@ -42,7 +42,7 @@ export const ROLE_RULES: Record<Role, RoleRule> = {
   },
   HEAD_ADMIN: {
     displayName: 'Head Admin',
-    allowedRooms: ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room', 'Events'],
+    allowedRooms: ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room', 'Event'],
     maxDaysAhead: 365,
     minLeadHours: 0,
     allowConcurrent: true,

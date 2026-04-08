@@ -1,5 +1,5 @@
 export type UserRole = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
-export type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'OTHER';
+export type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'GLOBAL_EVENT' | 'OTHER';
 export type ReservationStatus = 'active' | 'cancelled' | 'preempted';
  
 export interface User {
@@ -35,8 +35,7 @@ export interface Room {
 }
  
 export const ALL_ROOMS = [
-  'Meeting Room', 'Panda Room', 'Session Room', 'P159',
-  'Aquarium', 'The Stage', 'Conference Room',
+  'Meeting Room', 'Panda Room', 'Session Room', 'P159', 'The Stage',
 ];
  
 export const ROOMS_BY_ROLE: Record<UserRole, string[]> = {
@@ -64,5 +63,5 @@ export const TYPES_BY_ROLE: Record<UserRole, ReservationType[]> = {
   STUDENT:    ['MEETING', 'OTHER'],
   CEO:        ['MEETING', 'WORKSHOP', 'PITCHDECK', 'OTHER'],
   GUIDE:      ['SESSION', 'MEETING', 'OTHER'],
-  HEAD_ADMIN: ['SESSION', 'MEETING', 'WORKSHOP', 'PITCHDECK', 'EVENT', 'OTHER'],
+  HEAD_ADMIN: ['SESSION', 'MEETING', 'WORKSHOP', 'PITCHDECK', 'GLOBAL_EVENT', 'EVENT', 'OTHER'],
 };

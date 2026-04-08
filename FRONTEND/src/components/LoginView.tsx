@@ -9,7 +9,7 @@ interface LoginViewProps {
 
 const ROLE_OPTIONS: { role: UserRole; label: string; icon: string }[] = [
   { role: 'STUDENT', label: 'STUDENT', icon: '🎓' },
-  { role: 'CEO', label: 'CEO', icon: '👔' },
+  { role: 'CEO', label: 'LEADER', icon: '👔' },
   { role: 'GUIDE', label: 'GUIDE', icon: '🧭' },
   { role: 'HEAD_ADMIN', label: 'HEAD ADMIN', icon: '🛡️' },
 ];
@@ -25,6 +25,7 @@ export default function LoginView({ onLogin, onShowSignUp, error }: LoginViewPro
     setSelectedRole(role);
     setEmail('');
     setPassword('');
+    // intentionally keep showPassword state — no need to reset it
   };
 
   const handleSignIn = async () => {

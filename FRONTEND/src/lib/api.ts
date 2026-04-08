@@ -63,3 +63,8 @@ export async function getRooms(role?: UserRole) {
   const res = await api.get('/rooms', { params: role ? { role } : {} });
   return res.data;
 }
+
+export async function updateRoom(roomName: string, data: { allowedRoles: UserRole[] }) {
+  const res = await api.patch(`/rooms/${encodeURIComponent(roomName)}`, data);
+  return res.data;
+}

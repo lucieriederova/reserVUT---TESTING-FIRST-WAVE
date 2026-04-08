@@ -1,5 +1,5 @@
 export type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
-export type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'OTHER';
+export type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'GLOBAL_EVENT' | 'OTHER';
 
 export const ROLE_PRIORITY: Record<Role, number> = {
   STUDENT: 1,
@@ -9,8 +9,9 @@ export const ROLE_PRIORITY: Record<Role, number> = {
 };
 
 // Type-level priority override within a role's booking
-// EVENT always wins regardless of role
+// EVENT and GLOBAL_EVENT always win regardless of role
 export const TYPE_PRIORITY_BONUS: Record<ReservationType, number> = {
+  GLOBAL_EVENT: 10,
   EVENT: 10,
   SESSION: 2,
   WORKSHOP: 1,

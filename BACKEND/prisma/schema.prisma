@@ -27,6 +27,7 @@ enum ReservationType {
   WORKSHOP
   PITCHDECK
   EVENT
+  GLOBAL_EVENT
   OTHER
 }
 
