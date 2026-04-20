@@ -1,1 +1,8 @@
-{"deploy":{"startCommand":"npx tsx src/server.ts"}}
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "npx tsx src/server.ts"
+  }
+}
