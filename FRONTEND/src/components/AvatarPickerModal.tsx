@@ -67,3 +67,4 @@ export default function AvatarPickerModal({ currentIndex, onSelect, onClose }: A
 
 // Exportujeme ikony pro použití v profilu uživatele
 export { AVATAR_ICONS };
+export const AVATARS = AVATAR_ICONS;

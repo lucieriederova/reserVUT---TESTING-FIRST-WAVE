@@ -38,10 +38,10 @@ export default function ProfileModal({ user, onClose, onUpdate }: ProfileModalPr
           <div className="flex items-center gap-3 mb-5">
             <button
               onClick={() => setShowAvatarPicker(true)}
-              className="text-4xl w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center hover:bg-purple-200 transition-colors"
+              className="text-4xl w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center hover:bg-purple-200 transition-colors text-purple-600"
               title="Change avatar"
             >
-              {AVATARS[avatarIndex]}
+              {(() => { const Icon = AVATARS[avatarIndex]; return <Icon size={28} />; })()}
             </button>
             <div>
               <p className="font-bold text-sm text-gray-800">
@@ -56,15 +56,15 @@ export default function ProfileModal({ user, onClose, onUpdate }: ProfileModalPr
           <div className="mb-4">
             <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">CHOOSE AVATAR</p>
             <div className="flex gap-2">
-              {AVATARS.slice(0, 4).map((a, i) => (
+              {AVATARS.slice(0, 4).map((Icon, i) => (
                 <button
                   key={i}
                   onClick={() => onUpdate({ avatarIndex: i })}
-                  className={`text-2xl p-1 rounded-lg transition-all ${
-                    avatarIndex === i ? 'ring-2 ring-purple-500 bg-purple-50' : 'hover:bg-gray-100'
+                  className={`p-1 rounded-lg transition-all flex items-center justify-center ${
+                    avatarIndex === i ? 'ring-2 ring-purple-500 bg-purple-50 text-purple-600' : 'hover:bg-gray-100 text-gray-500'
                   }`}
                 >
-                  {a}
+                  <Icon size={24} />
                 </button>
               ))}
             </div>
