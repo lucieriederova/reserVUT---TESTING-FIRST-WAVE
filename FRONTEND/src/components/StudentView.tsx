@@ -71,11 +71,6 @@ export default function StudentView({
     return { text: 'STUDENT', color: 'text-pink-200' };
   })();
 
-  const bookingGradient = (() => {
-    if (user.role === 'CEO') return 'from-orange-400 to-yellow-300';
-    if (user.role === 'GUIDE') return 'from-purple-600 to-purple-400';
-    return 'from-pink-500 to-pink-300';
-  })();
 
   const rulesContent = (() => {
     if (user.role === 'CEO') return {
@@ -244,7 +239,7 @@ export default function StudentView({
                 <div className="flex items-center gap-3">
                   <WeekNavigator offset={currentWeekOffset} onChange={setCurrentWeekOffset} />
                   <button onClick={() => setShowBooking(true)}
-                    className={`flex items-center gap-1.5 bg-gradient-to-r ${bookingGradient} text-white font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-full shadow transition-colors`}>
+                    className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-full shadow transition-colors">
                     <span className="text-base leading-none">+</span> NEW BOOKING
                   </button>
                 </div>
