@@ -167,7 +167,7 @@ export default function HeadAdminView({
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${dark ? 'bg-gray-900' : 'bg-gray-900'}`}>
+    <div className={`min-h-screen flex flex-col ${dark ? 'bg-gray-900' : 'bg-gray-100'}`}>
       {/* NAVBAR */}
       <div className={`${navBg} border-b px-4 py-2 flex items-center justify-between`}>
         <div className="flex items-center gap-1">

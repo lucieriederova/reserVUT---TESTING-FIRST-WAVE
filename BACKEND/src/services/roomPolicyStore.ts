@@ -12,7 +12,6 @@ const rooms: RoomPolicy[] = [
   { name: 'Panda Room',    displayName: 'Panda Room',    capacity: 8,  allowedRoles: ['STUDENT', 'CEO', 'GUIDE', 'HEAD_ADMIN'] },
   { name: 'Session Room',  displayName: 'Session Room',  capacity: 20, allowedRoles: ['STUDENT', 'CEO', 'GUIDE', 'HEAD_ADMIN'] },
   { name: 'P159',          displayName: 'P159',          capacity: 30, allowedRoles: ['STUDENT', 'CEO', 'GUIDE', 'HEAD_ADMIN'] },
-  { name: 'Aquarium',      displayName: 'Aquarium',      capacity: 15, allowedRoles: ['CEO', 'GUIDE', 'HEAD_ADMIN'] },
   { name: 'The Stage',     displayName: 'The Stage',     capacity: 50, allowedRoles: ['CEO', 'GUIDE', 'HEAD_ADMIN'] },
   { name: 'Event',         displayName: 'Event (Global)',capacity: 999,allowedRoles: ['HEAD_ADMIN'] },
 ];

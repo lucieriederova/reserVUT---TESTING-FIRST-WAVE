@@ -176,8 +176,8 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
             min={today}
             max={maxDate()}
             onChange={(e) => { setSelectedDate(e.target.value); setStartTime(''); setEndTime(''); }}
-            className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 cursor-pointer box-border"
-            style={{ WebkitAppearance: 'none', maxWidth: '100%' }}
+            className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 cursor-pointer"
+            style={{ WebkitAppearance: 'none', MozAppearance: 'none', appearance: 'none', maxWidth: '100%', minWidth: 0, display: 'block', boxSizing: 'border-box' }}
           />
         </div>
 
