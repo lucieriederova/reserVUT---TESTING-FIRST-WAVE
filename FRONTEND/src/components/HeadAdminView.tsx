@@ -16,6 +16,7 @@ interface AdminUser {
   lastName?: string;
   role: UserRole;
   vutId?: string;
+  isVerified?: boolean;
 }
 
 interface HeadAdminViewProps {
@@ -393,9 +394,12 @@ export default function HeadAdminView({
                           <div className="flex gap-2">
                             <button onClick={() => { setManageUser(u); setManageNewRole(u.role); }}
                               className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${dark ? 'bg-gray-600 hover:bg-gray-500 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}>MANAGE</button>
-                            {onVerifyUser && (
+                            {onVerifyUser && !u.isVerified && (
                               <button onClick={() => onVerifyUser(u.id)}
                                 className="bg-green-100 hover:bg-green-200 text-green-700 text-xs font-bold px-3 py-1 rounded-lg transition-colors">VERIFY</button>
+                            )}
+                            {u.isVerified && (
+                              <span className="text-green-600 text-xs font-bold px-3 py-1">✓ Verified</span>
                             )}
                           </div>
                         </td>

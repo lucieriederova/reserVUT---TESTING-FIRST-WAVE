@@ -86,7 +86,7 @@ export default function MyReservationModal({ reservation, onClose, onCancel }: M
         ) : (
           <button
             onClick={handleCancel}
-            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm transition-colors"
+            className="w-full border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-bold py-2.5 rounded-lg text-sm transition-colors"
           >
             CANCEL RESERVATION
           </button>

@@ -34,7 +34,9 @@ function sameLocalDate(a: Date, b: Date): boolean {
 
 function getReservationStyle(
   r: Reservation,
-  startHour: number
+  startHour: number,
+  colIndex: number,
+  colCount: number
 ): React.CSSProperties {
   const start = new Date(r.startTime);
   const end = new Date(r.endTime);
@@ -43,7 +45,15 @@ function getReservationStyle(
   const clampedStart = Math.max(startH, startHour);
   const top = (clampedStart - startHour) * ROW_HEIGHT;
   const height = Math.max((endH - clampedStart) * ROW_HEIGHT - 2, 18);
-  return { position: 'absolute', top, height, left: 2, right: 2, zIndex: 10 };
+  const colW = 100 / colCount;
+  return {
+    position: 'absolute',
+    top,
+    height,
+    left: `calc(${colIndex * colW}% + 2px)`,
+    width: `calc(${colW}% - 4px)`,
+    zIndex: 10 + colIndex,
+  };
 }
 
 function getReservationColors(r: Reservation, isOwn: boolean): string {
@@ -149,12 +159,19 @@ export default function CalendarGrid({
                   const end = new Date(r.endTime);
                   const startLabel = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
                   const endLabel = `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+                  const overlaps = dayReservations.filter((o) => {
+                    const os = new Date(o.startTime).getTime();
+                    const oe = new Date(o.endTime).getTime();
+                    return os < end.getTime() && oe > start.getTime();
+                  });
+                  const colCount = overlaps.length;
+                  const colIndex = overlaps.indexOf(r);
                   return (
                     <button
                       key={r.id}
                       onClick={() => onReservationClick(r)}
-                      style={getReservationStyle(r, startHour)}
-                      className={`rounded-md text-[9px] font-semibold px-1.5 py-0.5 text-left overflow-hidden hover:opacity-90 active:opacity-75 transition-opacity ${getReservationColors(r, isOwn)}`}
+                      style={getReservationStyle(r, startHour, colIndex, colCount)}
+                      className={`rounded-md text-[9px] font-semibold px-1.5 py-0.5 text-left overflow-hidden hover:brightness-95 transition-all ${getReservationColors(r, isOwn)}`}
                       title={`${r.roomName} · ${startLabel}–${endLabel}${r.description ? ' · ' + r.description : ''}`}
                     >
                       <div className="truncate font-bold leading-tight">{r.roomName}</div>
