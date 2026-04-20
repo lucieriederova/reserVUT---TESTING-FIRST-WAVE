@@ -201,14 +201,14 @@ export default function StudentView({
                 <span className={`text-xs ${subText}`}>{roomDropdownOpen ? '▲' : '▼'}</span>
               </button>
               {roomDropdownOpen && (
-                <div className={`absolute top-full left-0 mt-1 border rounded-lg shadow-lg z-30 w-full overflow-hidden ${dropdownBg}`}>
+                <div className={`absolute top-full left-0 mt-2 border rounded-xl shadow-xl z-50 w-full overflow-hidden ${dropdownBg}`} style={{ minWidth: '180px' }}>
                   <button onClick={() => { setSelectedRoom(''); setRoomDropdownOpen(false); }}
-                    className={`w-full text-left px-4 py-2 text-sm border-b ${dropdownItem}`}>
+                    className={`w-full text-left px-4 py-2.5 text-sm font-medium border-b ${dropdownItem}`}>
                     All rooms
                   </button>
                   {ALL_ROOMS.map((room) => (
                     <button key={room} onClick={() => { setSelectedRoom(room); setRoomDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-2 text-sm border-b last:border-0 ${dropdownItem}`}>
+                      className={`w-full text-left px-4 py-2.5 text-sm border-b last:border-0 ${dropdownItem} ${selectedRoom === room ? 'font-semibold' : ''}`}>
                       {room}
                     </button>
                   ))}
@@ -250,6 +250,7 @@ export default function StudentView({
                   weekOffset={currentWeekOffset}
                   onReservationClick={handleCalendarClick}
                   currentUserId={user.id}
+                  userRole={user.role}
                   startHour={7}
                   endHour={21}
                 />

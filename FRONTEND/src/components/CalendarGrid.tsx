@@ -1,12 +1,20 @@
-import { Reservation } from './types';
+import { Reservation, UserRole } from './types';
 
 interface CalendarGridProps {
   reservations: Reservation[];
   weekOffset: number;
   onReservationClick: (r: Reservation) => void;
   currentUserId: string;
+  userRole?: UserRole;
   startHour?: number;
   endHour?: number;
+}
+
+function getTodayColors(role?: UserRole): { bg: string; text: string; header: string } {
+  if (role === 'CEO')        return { bg: 'bg-orange-50', text: 'text-orange-600', header: 'bg-orange-50' };
+  if (role === 'GUIDE')      return { bg: 'bg-purple-50', text: 'text-purple-600', header: 'bg-purple-50' };
+  if (role === 'HEAD_ADMIN') return { bg: 'bg-blue-50',   text: 'text-blue-600',   header: 'bg-blue-50' };
+  return { bg: 'bg-pink-50', text: 'text-pink-600', header: 'bg-pink-50' };
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -69,12 +77,14 @@ export default function CalendarGrid({
   weekOffset,
   onReservationClick,
   currentUserId,
+  userRole,
   startHour = 7,
   endHour = 21,
 }: CalendarGridProps) {
   const weekDates = getWeekDates(weekOffset);
   const HOURS = Array.from({ length: endHour - startHour }, (_, i) => i + startHour);
   const totalHeight = HOURS.length * ROW_HEIGHT;
+  const todayColors = getTodayColors(userRole);
 
   const getReservationsForDay = (day: Date) =>
     reservations.filter((r) => {
@@ -94,10 +104,10 @@ export default function CalendarGrid({
             return (
               <div
                 key={i}
-                className={`border-b border-r border-gray-200 h-8 flex flex-col items-center justify-center sticky top-0 z-20 ${isToday ? 'bg-purple-50' : 'bg-white'}`}
+                className={`border-b border-r border-gray-200 h-8 flex flex-col items-center justify-center sticky top-0 z-20 ${isToday ? todayColors.header : 'bg-white'}`}
               >
                 <span className="text-[10px] font-semibold text-gray-500">{DAYS[i]}</span>
-                <span className={`text-[10px] font-bold ${isToday ? 'text-purple-600' : 'text-gray-700'}`}>
+                <span className={`text-[10px] font-bold ${isToday ? todayColors.text : 'text-gray-700'}`}>
                   {day.getDate()}.{day.getMonth() + 1}.
                 </span>
               </div>
@@ -129,7 +139,7 @@ export default function CalendarGrid({
             return (
               <div
                 key={di}
-                className={`border-r border-gray-200 relative ${isToday ? 'bg-purple-50' : ''}`}
+                className={`border-r border-gray-200 relative ${isToday ? todayColors.bg : ''}`}
                 style={{ height: totalHeight }}
               >
                 {/* Hour grid lines */}
