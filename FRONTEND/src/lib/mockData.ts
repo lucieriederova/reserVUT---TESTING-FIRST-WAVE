@@ -92,7 +92,7 @@ export const MOCK_RESERVATIONS: Reservation[] = [
   },
   {
     id: 'res-cancelled-1',
-    roomName: 'Aquarium',
+    roomName: 'Panda Room',
     startTime: baseIso('2026-03-12T15:00:00Z'),
     endTime: baseIso('2026-03-12T17:30:00Z'),
     description: 'Cancelled prep',

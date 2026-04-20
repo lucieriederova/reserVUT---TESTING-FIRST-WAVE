@@ -41,51 +41,51 @@ export default function SignUpView({ onSignUp, onBackToLogin, error }: SignUpVie
   const displayError = localError || error;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* reserVUT badge */}
-      <div className="absolute top-4 right-4">
-        <span className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+    <div className="min-h-screen bg-gray-100 flex flex-col relative font-sans">
+      {/* reserVUT badge - Opravená velikost a padding podle Login screenu */}
+      <div className="absolute top-6 right-6">
+        <span className="bg-[#8b5cf6] text-white text-lg font-bold px-6 py-2.5 rounded-full shadow-sm tracking-tight">
           reserVUT
         </span>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
-          {/* Logo */}
+          {/* Logo T FP */}
           <div className="flex justify-center mb-2">
             <div className="flex items-center gap-1">
-              <span className="bg-red-600 text-white font-bold text-lg px-2 py-1 rounded">T</span>
-              <span className="bg-gray-200 text-gray-700 font-bold text-lg px-2 py-1 rounded">FP</span>
+              <span className="bg-[#d32f2f] text-white font-bold text-xl px-2.5 py-1 rounded">T</span>
+              <span className="bg-[#e0e0e0] text-gray-700 font-bold text-xl px-2.5 py-1 rounded">FP</span>
             </div>
           </div>
 
-          <h1 className="text-center text-xl font-bold text-gray-800 mb-6">SIGN UP</h1>
+          <h1 className="text-center text-xl font-extrabold text-gray-800 mb-8 tracking-tight">SIGN UP</h1>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1">NAME</label>
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">NAME</label>
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First name"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-full border border-gray-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1">SURNAME</label>
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">SURNAME</label>
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last name"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-full border border-gray-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">
                 E-MAIL ADDRESS
               </label>
               <input
@@ -93,23 +93,23 @@ export default function SignUpView({ onSignUp, onBackToLogin, error }: SignUpVie
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your.email@vut.cz"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-full border border-gray-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1">PASSWORD</label>
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">PASSWORD</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-full border border-gray-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-1">
+              <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">
                 REPEAT PASSWORD
               </label>
               <input
@@ -117,33 +117,33 @@ export default function SignUpView({ onSignUp, onBackToLogin, error }: SignUpVie
                 value={repeatPassword}
                 onChange={(e) => setRepeatPassword(e.target.value)}
                 placeholder="••••••••"
-                className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                className={`w-full border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
                   passwordMismatch
                     ? 'border-red-400 focus:ring-red-300 bg-red-50'
-                    : 'border-gray-300 focus:ring-purple-400'
+                    : 'border-gray-200 focus:ring-purple-400'
                 }`}
               />
               {passwordMismatch && (
-                <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
+                <p className="text-red-500 text-[11px] mt-1.5 font-medium">Passwords do not match</p>
               )}
             </div>
           </div>
 
           {displayError && (
-            <p className="text-red-500 text-xs mt-3 text-center">{displayError}</p>
+            <p className="text-red-500 text-xs mt-4 text-center font-medium">{displayError}</p>
           )}
 
           <button
             onClick={handleSignUp}
             disabled={loading || passwordMismatch}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-lg transition-colors text-sm mt-5"
+            className="w-full bg-[#a855f7] hover:bg-[#9333ea] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg text-sm mt-8 uppercase tracking-wide"
           >
-            {loading ? 'SIGNING UP...' : 'SIGN IN'}
+            {loading ? 'SIGNING UP...' : 'SIGN UP'}
           </button>
 
-          <p className="text-center text-xs text-gray-500 mt-4">
+          <p className="text-center text-xs text-gray-500 mt-6">
             Already have an account?{' '}
-            <button onClick={onBackToLogin} className="text-purple-600 hover:underline font-medium">
+            <button onClick={onBackToLogin} className="text-[#8b5cf6] hover:underline font-bold transition-all">
               Sign in
             </button>
           </p>
