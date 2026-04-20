@@ -178,7 +178,7 @@ export default function App() {
 
   const handleLogout = async () => {
     if (!USE_MOCK_API) {
-      await supabase.auth.signOut();
+      try { await supabase.auth.signOut(); } catch { /* ignore */ }
     }
     localStorage.removeItem(USER_STORAGE_KEY);
     setCurrentUser(null);
