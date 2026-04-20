@@ -38,7 +38,7 @@ interface HeadAdminViewProps {
   onAddRoom: (room: Omit<Room, 'id'>) => Promise<void>;
 }
 
-const ROOM_LIST = ['Session Room', 'Meeting Room', 'The Stage', 'Panda Room', 'P159', 'Aquarium', 'Event'];
+const ROOM_LIST = ['Session Room', 'Meeting Room', 'The Stage', 'Panda Room', 'P159', 'Event'];
 
 const TYPE_FILTER_OPTIONS: Array<{ value: ReservationType | 'ALL'; label: string }> = [
   { value: 'ALL', label: 'All' },

@@ -15,18 +15,18 @@ export const ROLE_RULES: Record<Role, RoleRule> = {
   },
   CEO: {
     displayName: 'Leader',
-    allowedRooms: ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room'],
+    allowedRooms: ['Panda Room', 'Session Room', 'The Stage', 'P159', 'Meeting Room'],
     maxDaysAhead: 5,
   },
   GUIDE: {
     displayName: 'Guide',
-    allowedRooms: ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room'],
+    allowedRooms: ['Panda Room', 'Session Room', 'The Stage', 'P159', 'Meeting Room'],
     maxDaysAhead: 365,
     minLeadDays: 2,
   },
   HEAD_ADMIN: {
     displayName: 'Head Admin',
-    allowedRooms: ['Event', 'Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room'],
+    allowedRooms: ['Event', 'Panda Room', 'Session Room', 'The Stage', 'P159', 'Meeting Room'],
     maxDaysAhead: 365,
   },
 };

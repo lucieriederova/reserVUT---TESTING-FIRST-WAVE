@@ -40,9 +40,9 @@ export const ALL_ROOMS = [
  
 export const ROOMS_BY_ROLE: Record<UserRole, string[]> = {
   STUDENT:    ['Meeting Room', 'Panda Room', 'Session Room', 'P159'],
-  CEO:        ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room'],
-  GUIDE:      ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room'],
-  HEAD_ADMIN: ['Panda Room', 'Session Room', 'Aquarium', 'The Stage', 'P159', 'Meeting Room', 'Event'],
+  CEO:        ['Panda Room', 'Session Room', 'The Stage', 'P159', 'Meeting Room'],
+  GUIDE:      ['Panda Room', 'Session Room', 'The Stage', 'P159', 'Meeting Room'],
+  HEAD_ADMIN: ['Panda Room', 'Session Room', 'The Stage', 'P159', 'Meeting Room', 'Event'],
 };
  
 export const MAX_DURATION_MINUTES: Record<UserRole, number> = {

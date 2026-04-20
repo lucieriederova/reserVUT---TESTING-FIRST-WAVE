@@ -14,7 +14,7 @@ export default function ProfileModal({ user, onClose, onUpdate }: ProfileModalPr
 
   const roleLabel: Record<string, string> = {
     STUDENT: 'STUDENT',
-    CEO: 'CEO',
+    CEO: 'LEADER',
     GUIDE: 'GUIDE',
     HEAD_ADMIN: 'HEAD ADMIN',
   };

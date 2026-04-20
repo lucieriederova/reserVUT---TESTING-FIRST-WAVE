@@ -96,7 +96,7 @@ export default function StudentView({
     return {
       label: 'Student',
       color: 'text-pink-500',
-      text: 'Max 5 days ahead. Max 2 bookings per week. Max 2h per booking, min 15 min. No simultaneous bookings.',
+      text: 'Max 5 days ahead. Max 2 bookings per week. Max 2h 30min per booking, min 15 min. No simultaneous bookings.',
     };
   })();
 
