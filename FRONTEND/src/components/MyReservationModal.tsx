@@ -26,8 +26,8 @@ export default function MyReservationModal({ reservation, onClose, onCancel }: M
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-sm p-5 sm:p-6 relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl leading-none">×</button>
 
         <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4">MY RESERVATION</h2>

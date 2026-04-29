@@ -7,6 +7,9 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        'xs': '375px',
+      },
       colors: {
         'vut-red': '#e11d48',
       }

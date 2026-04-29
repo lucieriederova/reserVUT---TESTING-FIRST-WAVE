@@ -129,15 +129,14 @@ export default function StudentView({
     <div className={`min-h-screen ${bg} flex flex-col`}>
 
       {/* TOP NAVBAR */}
-      <div className={`${navBg} border-b px-5 py-2 flex items-center justify-between`}>
+      <div className={`${navBg} border-b px-4 sm:px-5 py-2.5 flex items-center justify-between`}>
         <div className="flex items-center gap-1">
           <span className="bg-red-600 text-white font-black text-base px-2 py-1 rounded">T</span>
           <span className="bg-purple-600 text-white font-black text-base px-2 py-1 rounded">FP</span>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Dark mode toggle */}
-          <button onClick={toggleDark} title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-            className={`transition-colors ${dark ? 'text-yellow-400' : 'text-gray-500'}`}>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button onClick={toggleDark} title={dark ? 'Light mode' : 'Dark mode'}
+            className={`p-1.5 rounded-lg transition-colors ${dark ? 'text-yellow-400' : 'text-gray-500'}`}>
             {dark ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
@@ -152,7 +151,7 @@ export default function StudentView({
             )}
           </button>
           <button onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-            className={`transition-colors ${notificationsEnabled ? (dark ? 'text-gray-300' : 'text-gray-700') : 'text-gray-400'}`}
+            className={`p-1.5 rounded-lg transition-colors ${notificationsEnabled ? (dark ? 'text-gray-300' : 'text-gray-600') : 'text-gray-400'}`}
             title={notificationsEnabled ? 'Notifications on' : 'Notifications off'}>
             {notificationsEnabled ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -167,12 +166,16 @@ export default function StudentView({
               </svg>
             )}
           </button>
-          <div className="text-right">
-            <p className={`text-sm font-semibold leading-tight ${headingText}`}>{user.firstName} {user.lastName}</p>
-            <p className={`text-xs leading-tight ${subText}`} style={{ WebkitUserSelect: 'none', pointerEvents: 'none' }}>{user.email}</p>
+          {/* Name: first name only on mobile, full name on sm+ */}
+          <div className="text-right hidden xs:block">
+            <p className={`text-sm font-semibold leading-tight ${headingText}`}>
+              <span className="hidden sm:inline">{user.firstName} {user.lastName}</span>
+              <span className="sm:hidden">{user.firstName}</span>
+            </p>
+            <p className={`text-xs leading-tight hidden sm:block ${subText}`} style={{ WebkitUserSelect: 'none', pointerEvents: 'none' }}>{user.email}</p>
           </div>
           <button onClick={() => setShowProfile(true)}
-            className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-purple-400 transition ${dark ? 'bg-[#252d45]' : 'bg-gray-200'}`}>
+            className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-purple-400 transition flex-shrink-0 ${dark ? 'bg-[#252d45]' : 'bg-gray-200'}`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
@@ -184,38 +187,39 @@ export default function StudentView({
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 flex flex-col min-h-0">
 
-          {/* Watermark + RULES */}
-          <div className="relative px-5 pt-2 pb-0 flex items-center overflow-hidden">
-            <div className="select-none pointer-events-none flex-shrink-0">
+          {/* RULES — watermark hidden on mobile */}
+          <div className="relative px-4 sm:px-5 pt-2 pb-0 flex items-center overflow-hidden">
+            <div className="hidden sm:block select-none pointer-events-none flex-shrink-0">
               <span className={`block font-black uppercase leading-none ${watermarkInfo.color}`}
                 style={{ fontSize: 'clamp(70px, 13vw, 140px)', opacity: 0.35, letterSpacing: '0.02em' }}>
                 {watermarkInfo.text}
               </span>
             </div>
-            <div className="ml-6 flex-1 max-w-sm">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">RULES</p>
-              <p className={`text-base font-black uppercase mb-1 ${rulesContent.color}`}>{rulesContent.label}</p>
-              <p className="text-sm text-gray-500 leading-relaxed">{rulesContent.text}</p>
+            <div className="sm:ml-6 flex-1 max-w-sm">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">RULES</p>
+              <p className={`text-sm sm:text-base font-black uppercase mb-0.5 ${rulesContent.color}`}>{rulesContent.label}</p>
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{rulesContent.text}</p>
             </div>
           </div>
 
           {/* ROOM SELECT + TYPE FILTER */}
-          <div className="px-5 mt-2 flex items-center gap-3 flex-wrap relative z-30">
-            <div className="relative inline-block">
+          <div className="px-4 sm:px-5 mt-2 flex flex-col sm:flex-row sm:items-center gap-2 relative z-30">
+            {/* Room dropdown — full width on mobile */}
+            <div className="relative w-full sm:w-auto sm:inline-block">
               <button onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
-                className={`flex items-center gap-2 border rounded-lg px-4 py-2 text-sm font-medium shadow-sm min-w-[180px] justify-between ${btnBorder}`}>
+                className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm w-full sm:min-w-[180px] justify-between ${btnBorder}`}>
                 <span>{selectedRoom || 'SELECT ROOM'}</span>
                 <span className={`text-xs ${subText}`}>{roomDropdownOpen ? '▲' : '▼'}</span>
               </button>
               {roomDropdownOpen && (
                 <div className={`absolute top-full left-0 mt-2 border rounded-xl shadow-xl z-50 w-full overflow-hidden ${dropdownBg}`} style={{ minWidth: '180px' }}>
                   <button onClick={() => { setSelectedRoom(''); setRoomDropdownOpen(false); }}
-                    className={`w-full text-left px-4 py-2.5 text-sm font-medium border-b ${dropdownItem}`}>
+                    className={`w-full text-left px-4 py-3 text-sm font-medium border-b ${dropdownItem}`}>
                     All rooms
                   </button>
                   {ALL_ROOMS.map((room) => (
                     <button key={room} onClick={() => { setSelectedRoom(room); setRoomDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm border-b last:border-0 ${dropdownItem} ${selectedRoom === room ? 'font-semibold' : ''}`}>
+                      className={`w-full text-left px-4 py-3 text-sm border-b last:border-0 ${dropdownItem} ${selectedRoom === room ? 'font-semibold' : ''}`}>
                       {room}
                     </button>
                   ))}
@@ -223,11 +227,11 @@ export default function StudentView({
               )}
             </div>
 
-            {/* Type filter */}
-            <div className="flex gap-1 flex-wrap">
+            {/* Type filter — horizontal scroll on mobile (no wrap) */}
+            <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide flex-nowrap sm:flex-wrap">
               {TYPE_FILTER_OPTIONS.map(({ value, label }) => (
                 <button key={value} onClick={() => setTypeFilter(value)}
-                  className={`px-2.5 py-1 text-[10px] font-bold rounded-full transition-colors ${
+                  className={`px-3 py-1.5 text-[10px] font-bold rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
                     typeFilter === value
                       ? 'bg-purple-600 text-white'
                       : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
@@ -239,15 +243,17 @@ export default function StudentView({
           </div>
 
           {/* Calendar */}
-          <div className="px-5 pt-3 pb-5 flex-1 flex flex-col">
+          <div className="px-4 sm:px-5 pt-3 pb-4 sm:pb-5 flex-1 flex flex-col">
             <div className={`${cardBg} border rounded-2xl shadow-md flex-1 flex flex-col overflow-hidden`}>
-              <div className={`flex items-center justify-between px-5 py-3 border-b ${dark ? 'border-gray-700' : 'border-gray-100'}`}>
-                <span className={`text-base font-black uppercase tracking-widest ${headingText}`}>CALENDAR</span>
-                <div className="flex items-center gap-3">
+              {/* Calendar header — stacks on mobile */}
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-5 py-3 gap-2 border-b ${dark ? 'border-[#252d42]' : 'border-gray-100'}`}>
+                <span className={`text-sm sm:text-base font-black uppercase tracking-widest ${headingText}`}>CALENDAR</span>
+                <div className="flex items-center justify-between sm:justify-end gap-2">
                   <WeekNavigator offset={currentWeekOffset} onChange={setCurrentWeekOffset} />
                   <button onClick={() => setShowBooking(true)}
                     className={`flex items-center gap-1.5 ${bookingBtnClass} text-white font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-full shadow transition-colors`}>
-                    <span className="text-base leading-none">+</span> NEW BOOKING
+                    <span className="text-base leading-none">+</span>
+                    <span className="hidden xs:inline">NEW </span>BOOKING
                   </button>
                 </div>
               </div>
@@ -265,12 +271,33 @@ export default function StudentView({
               </div>
             </div>
           </div>
+
+          {/* MOBILE BOTTOM SECTION — upcoming + logout, hidden on desktop */}
+          <div className={`lg:hidden px-4 pb-4 flex flex-col gap-2`}>
+            <div className={`${cardBg} border rounded-2xl px-4 py-3 flex items-center justify-between`}>
+              <p className={`text-xs font-black uppercase tracking-widest ${headingText}`}>UPCOMING</p>
+              {upcomingReservations.length === 0
+                ? <p className={`text-xs italic ${subText}`}>No upcoming</p>
+                : <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className={`text-xs font-medium ${subText}`}>{upcomingReservations.length} reservation{upcomingReservations.length > 1 ? 's' : ''}</span>
+                  </div>
+              }
+            </div>
+            <button onClick={onLogout}
+              className={`${cardBg} border rounded-2xl px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold transition ${dark ? 'text-gray-400 hover:bg-[#1e2438]' : 'text-gray-600 hover:bg-gray-50'}`}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              LOG OUT
+            </button>
+          </div>
         </div>
 
-        {/* RIGHT SIDEBAR */}
-        <div className="w-64 flex flex-col gap-3 p-4 shrink-0">
-
-          {/* UPCOMING */}
+        {/* RIGHT SIDEBAR — desktop only */}
+        <div className="hidden lg:flex w-64 flex-col gap-3 p-4 shrink-0">
           <div className={`${cardBg} border rounded-2xl shadow-sm px-5 py-4 flex-1`}>
             <p className={`text-sm font-black uppercase tracking-widest text-center mb-3 ${headingText}`}>UPCOMING</p>
             <div className="space-y-2">
@@ -285,7 +312,6 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* CANCELLED */}
           <div className={`${cardBg} border rounded-2xl shadow-sm px-5 py-4 flex-1`}>
             <p className={`text-sm font-black uppercase tracking-widest text-center mb-3 ${headingText}`}>CANCELED</p>
             <div className="space-y-2">
