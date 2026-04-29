@@ -18,6 +18,7 @@ export default function App() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loginError, setLoginError] = useState('');
+  const [signUpSuccessEmail, setSignUpSuccessEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const cancelledIds = useRef<Set<string>>(new Set());
 
@@ -105,6 +106,7 @@ export default function App() {
 
   const handleLogin = async (email: string, password: string, role: UserRole) => {
     setLoginError('');
+    setSignUpSuccessEmail('');
     if (USE_MOCK_API) {
       const mockUser = getMockUser(email, role);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(mockUser));
@@ -115,7 +117,17 @@ export default function App() {
       return;
     }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error || !data.user) { setLoginError(error?.message ?? 'Login failed'); return; }
+    if (error || !data.user) {
+      const msg = error?.message ?? '';
+      if (/email not confirmed|not confirmed/i.test(msg)) {
+        setLoginError('Your email is not confirmed yet. Check your inbox and click the confirmation link, then try signing in again.');
+      } else if (/invalid login credentials|invalid credentials|wrong password/i.test(msg)) {
+        setLoginError('Incorrect email or password.');
+      } else {
+        setLoginError(msg || 'Login failed');
+      }
+      return;
+    }
 
     let backendUser: User;
     try {
@@ -167,12 +179,35 @@ export default function App() {
       options: { data: { first_name: formData.firstName, last_name: formData.lastName } },
     });
     if (error || !data.user) throw new Error(error?.message ?? 'Sign up failed');
+
+    let syncedUser: any = null;
     try {
-      await syncLogin({ id: data.user.id, email: formData.email }, 'STUDENT', {
+      syncedUser = await syncLogin({ id: data.user.id, email: formData.email }, 'STUDENT', {
         firstName: formData.firstName,
         lastName: formData.lastName,
       });
-    } catch { /* ignore */ }
+    } catch { /* backend offline — continue anyway */ }
+
+    // Supabase auto-confirm is on → session exists, log in immediately
+    if (data.session) {
+      const user: User = {
+        id: syncedUser?.user?.id ?? data.user.id,
+        email: formData.email,
+        firstName: syncedUser?.user?.firstName ?? formData.firstName,
+        lastName: syncedUser?.user?.lastName ?? formData.lastName,
+        role: 'STUDENT',
+        isVerified: true,
+        avatarIndex: 0,
+      };
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      setCurrentUser(user);
+      setScreen('app');
+      fetchReservations(cancelledIds.current);
+      return;
+    }
+
+    // Email confirmation required — show message on login screen
+    setSignUpSuccessEmail(formData.email);
     setScreen('login');
   };
 
@@ -281,7 +316,7 @@ export default function App() {
   }
 
   if (screen === 'login' || !currentUser) {
-    return <LoginView onLogin={handleLogin} onShowSignUp={() => setScreen('signup')} error={loginError} />;
+    return <LoginView onLogin={handleLogin} onShowSignUp={() => setScreen('signup')} error={loginError} signUpSuccessEmail={signUpSuccessEmail} />;
   }
 
   if (currentUser.role === 'HEAD_ADMIN') {

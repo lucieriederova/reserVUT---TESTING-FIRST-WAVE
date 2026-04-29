@@ -6,6 +6,7 @@ interface LoginViewProps {
   onLogin: (email: string, password: string, role: UserRole) => Promise<void>;
   onShowSignUp: () => void;
   error?: string;
+  signUpSuccessEmail?: string;
 }
 
 const ROLE_OPTIONS = [
@@ -15,7 +16,7 @@ const ROLE_OPTIONS = [
   { role: 'HEAD_ADMIN' as UserRole, label: 'HEAD ADMIN', icon: ShieldCheck },
 ];
 
-export default function LoginView({ onLogin, onShowSignUp, error }: LoginViewProps) {
+export default function LoginView({ onLogin, onShowSignUp, error, signUpSuccessEmail }: LoginViewProps) {
   const [selectedRole, setSelectedRole] = useState<UserRole>('STUDENT');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -136,6 +137,13 @@ export default function LoginView({ onLogin, onShowSignUp, error }: LoginViewPro
               </button>
             </div>
           </div>
+
+          {signUpSuccessEmail && (
+            <div className="mb-4 bg-green-50 border border-green-200 rounded-md px-4 py-3 text-center">
+              <p className="text-green-700 text-xs font-bold mb-0.5">Registration successful!</p>
+              <p className="text-green-600 text-xs">We sent a confirmation link to <span className="font-semibold">{signUpSuccessEmail}</span>. Click it, then sign in here.</p>
+            </div>
+          )}
 
           {error && (
             <p className="text-red-500 text-xs mb-4 text-center font-medium bg-red-50 py-2 rounded-md">{error}</p>
