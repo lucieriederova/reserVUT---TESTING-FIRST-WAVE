@@ -56,14 +56,14 @@ export default function StudentView({
   };
 
   // Theme
-  const bg = dark ? 'bg-gray-900' : 'bg-white';
-  const navBg = dark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200';
-  const cardBg = dark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
-  const headingText = dark ? 'text-gray-100' : 'text-gray-900';
-  const subText = dark ? 'text-gray-400' : 'text-gray-500';
-  const btnBorder = dark ? 'bg-gray-700 border-gray-600 text-gray-200 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50';
-  const dropdownBg = dark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200';
-  const dropdownItem = dark ? 'text-gray-200 hover:bg-gray-600 border-gray-600' : 'text-gray-700 hover:bg-gray-50 border-gray-100';
+  const bg = dark ? 'bg-[#141720]' : 'bg-white';
+  const navBg = dark ? 'bg-[#1a1f2e] border-[#252d42]' : 'bg-gray-100 border-gray-200';
+  const cardBg = dark ? 'bg-[#1a1f2e] border-[#252d42]' : 'bg-white border-gray-200';
+  const headingText = dark ? 'text-gray-300' : 'text-gray-900';
+  const subText = dark ? 'text-gray-500' : 'text-gray-500';
+  const btnBorder = dark ? 'bg-[#1e2438] border-[#2d3650] text-gray-400 hover:bg-[#252d45]' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50';
+  const dropdownBg = dark ? 'bg-[#1e2438] border-[#2d3650]' : 'bg-white border-gray-200';
+  const dropdownItem = dark ? 'text-gray-400 hover:bg-[#252d45] border-[#2d3650]' : 'text-gray-700 hover:bg-gray-50 border-gray-100';
 
   const watermarkInfo = (() => {
     if (user.role === 'CEO') return { text: 'LEADER', color: 'text-orange-200' };
@@ -152,7 +152,7 @@ export default function StudentView({
             )}
           </button>
           <button onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-            className={`transition-colors ${notificationsEnabled ? 'text-gray-700' : 'text-gray-400'}`}
+            className={`transition-colors ${notificationsEnabled ? (dark ? 'text-gray-300' : 'text-gray-700') : 'text-gray-400'}`}
             title={notificationsEnabled ? 'Notifications on' : 'Notifications off'}>
             {notificationsEnabled ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -172,7 +172,7 @@ export default function StudentView({
             <p className={`text-xs leading-tight ${subText}`} style={{ WebkitUserSelect: 'none', pointerEvents: 'none' }}>{user.email}</p>
           </div>
           <button onClick={() => setShowProfile(true)}
-            className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-purple-400 transition ${dark ? 'bg-gray-600' : 'bg-gray-200'}`}>
+            className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-purple-400 transition ${dark ? 'bg-[#252d45]' : 'bg-gray-200'}`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
@@ -230,7 +230,7 @@ export default function StudentView({
                   className={`px-2.5 py-1 text-[10px] font-bold rounded-full transition-colors ${
                     typeFilter === value
                       ? 'bg-purple-600 text-white'
-                      : dark ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                   }`}>
                   {label}
                 </button>
@@ -251,7 +251,7 @@ export default function StudentView({
                   </button>
                 </div>
               </div>
-              <div className={`flex-1 overflow-auto rounded-b-2xl ${dark ? 'bg-gray-700' : 'bg-gray-100'}`}>
+              <div className={`flex-1 overflow-auto rounded-b-2xl ${dark ? 'bg-[#1a1f2e]' : 'bg-gray-100'}`}>
                 <CalendarGrid
                   reservations={filteredReservations}
                   weekOffset={currentWeekOffset}
@@ -260,6 +260,7 @@ export default function StudentView({
                   userRole={user.role}
                   startHour={7}
                   endHour={21}
+                  dark={dark}
                 />
               </div>
             </div>
@@ -276,7 +277,7 @@ export default function StudentView({
               {upcomingReservations.length === 0 && <p className={`text-xs text-center italic ${subText}`}>No upcoming</p>}
               {upcomingReservations.map((r) => (
                 <button key={r.id} onClick={() => { setSelectedReservation(r); setShowMyReservation(true); }}
-                  className={`w-full flex items-center gap-2 text-left py-1 rounded-lg px-1 transition ${dark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>
+                  className={`w-full flex items-center gap-2 text-left py-1 rounded-lg px-1 transition ${dark ? 'hover:bg-[#1e2438]' : 'hover:bg-gray-50'}`}>
                   <span className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0" />
                   <span className={`text-xs ${subText}`}>{formatReservationLabel(r)}</span>
                 </button>
@@ -299,7 +300,7 @@ export default function StudentView({
           </div>
 
           <button onClick={onLogout}
-            className={`${cardBg} border rounded-2xl shadow-sm px-5 py-3 flex items-center justify-center gap-2 text-sm font-semibold transition ${dark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'}`}>
+            className={`${cardBg} border rounded-2xl shadow-sm px-5 py-3 flex items-center justify-center gap-2 text-sm font-semibold transition ${dark ? 'text-gray-400 hover:bg-[#1e2438]' : 'text-gray-600 hover:bg-gray-50'}`}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
               <polyline points="16 17 21 12 16 7"/>

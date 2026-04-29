@@ -126,18 +126,18 @@ export default function HeadAdminView({
   const UserAvatarIcon = AVATAR_ICONS[user.avatarIndex ?? 0] || AVATAR_ICONS[0];
 
   // Theme helpers
-  const navBg = 'bg-gray-900 border-gray-700';
-  const sidebarBg = dark ? 'bg-gray-800' : 'bg-gray-100 border-r border-gray-200';
-  const sidebarText = dark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700';
-  const sidebarActive = dark ? 'text-white bg-gray-700' : 'text-gray-800 bg-gray-200';
-  const contentBg = dark ? 'bg-gray-900' : 'bg-gray-50';
-  const cardBg = dark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
-  const headingText = dark ? 'text-gray-100' : 'text-gray-800';
-  const subText = dark ? 'text-gray-400' : 'text-gray-500';
-  const tableHead = dark ? 'text-gray-500' : 'text-gray-400';
-  const tableRow = dark ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-50 hover:bg-gray-50';
+  const navBg = dark ? 'bg-[#141720] border-[#252d42]' : 'bg-gray-900 border-gray-700';
+  const sidebarBg = dark ? 'bg-[#1a1f2e]' : 'bg-gray-100 border-r border-gray-200';
+  const sidebarText = dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700';
+  const sidebarActive = dark ? 'text-gray-200 bg-[#252d45]' : 'text-gray-800 bg-gray-200';
+  const contentBg = dark ? 'bg-[#141720]' : 'bg-gray-50';
+  const cardBg = dark ? 'bg-[#1a1f2e] border-[#252d42]' : 'bg-white border-gray-200';
+  const headingText = dark ? 'text-gray-300' : 'text-gray-800';
+  const subText = dark ? 'text-gray-500' : 'text-gray-500';
+  const tableHead = dark ? 'text-gray-600' : 'text-gray-400';
+  const tableRow = dark ? 'border-[#252d42] hover:bg-[#1e2438]/60' : 'border-gray-50 hover:bg-gray-50';
   const inputClass = dark
-    ? 'bg-gray-700 border-gray-600 text-gray-100 focus:ring-purple-500 placeholder-gray-500'
+    ? 'bg-[#1e2438] border-[#2d3650] text-gray-300 focus:ring-purple-500 placeholder-gray-600'
     : 'bg-white border-gray-300 text-gray-700 focus:ring-purple-300';
 
   const guides = allUsers.filter((u) => u.role === 'GUIDE');
@@ -169,7 +169,7 @@ export default function HeadAdminView({
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${dark ? 'bg-gray-900' : 'bg-gray-100'}`}>
+    <div className={`min-h-screen flex flex-col ${dark ? 'bg-[#141720]' : 'bg-gray-100'}`}>
       {/* NAVBAR */}
       <div className={`${navBg} border-b px-4 py-2 flex items-center justify-between`}>
         <div className="flex items-center gap-1">
@@ -204,7 +204,7 @@ export default function HeadAdminView({
         {/* SIDEBAR */}
         <div className={`${sidebarBg} flex flex-col transition-all duration-200 ${sidebarCollapsed ? 'w-12' : 'w-52'}`}>
           {!sidebarCollapsed && (
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+            <div className="p-4 border-b border-[#252d42] flex items-center justify-between">
               <span className="bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-full">RESERVUT</span>
             </div>
           )}
@@ -218,7 +218,7 @@ export default function HeadAdminView({
             ))}
           </nav>
           <button onClick={onLogout}
-            className="flex items-center gap-2 px-4 py-4 text-[10px] font-bold text-gray-500 hover:text-red-400 border-t border-gray-700 transition-colors uppercase tracking-widest">
+            className="flex items-center gap-2 px-4 py-4 text-[10px] font-bold text-gray-500 hover:text-red-400 border-t border-[#252d42] transition-colors uppercase tracking-widest">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             {!sidebarCollapsed && <span>LOG OUT</span>}
           </button>
@@ -238,7 +238,7 @@ export default function HeadAdminView({
                 </div>
               </div>
               <div className={`${cardBg} rounded-2xl border p-2 flex-1 shadow-sm overflow-hidden`}>
-                <CalendarGrid reservations={filteredReservations} weekOffset={weekOffset} onReservationClick={() => {}} currentUserId={user.id} userRole={user.role} />
+                <CalendarGrid reservations={filteredReservations} weekOffset={weekOffset} onReservationClick={() => {}} currentUserId={user.id} userRole={user.role} dark={dark} />
               </div>
             </div>
           )}
@@ -250,14 +250,14 @@ export default function HeadAdminView({
               <div className="flex gap-2 mb-2">
                 {(['GUIDES', 'LEADERS'] as const).map(tab => (
                   <button key={tab} onClick={() => setRolesTab(tab)}
-                    className={`px-4 py-1.5 text-xs font-bold rounded-full transition-colors ${rolesTab === tab ? 'bg-purple-600 text-white' : `${dark ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}`}>
+                    className={`px-4 py-1.5 text-xs font-bold rounded-full transition-colors ${rolesTab === tab ? 'bg-purple-600 text-white' : `${dark ? 'bg-[#1e2438] text-gray-400' : 'bg-gray-200 text-gray-600'}`}`}>
                     {tab}
                   </button>
                 ))}
               </div>
               <div className={`${cardBg} border rounded-2xl overflow-hidden shadow-sm`}>
                 <table className="w-full text-left text-sm">
-                  <thead className={`text-[10px] font-bold uppercase tracking-widest ${tableHead} ${dark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                  <thead className={`text-[10px] font-bold uppercase tracking-widest ${tableHead} ${dark ? 'bg-[#1e2438]/60' : 'bg-gray-50'}`}>
                     <tr>
                       <th className="px-4 py-3">User</th>
                       <th className="px-4 py-3">Email</th>
@@ -266,7 +266,7 @@ export default function HeadAdminView({
                       <th className="px-4 py-3">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className={`divide-y ${dark ? 'divide-gray-700' : 'divide-gray-100'}`}>
+                  <tbody className={`divide-y ${dark ? 'divide-[#252d42]' : 'divide-gray-100'}`}>
                     {(rolesTab === 'GUIDES' ? guides : leaders).map(u => (
                       <tr key={u.id} className={tableRow}>
                         <td className={`px-4 py-3 font-medium ${headingText}`}>{u.firstName} {u.lastName}</td>
@@ -279,7 +279,7 @@ export default function HeadAdminView({
                         </td>
                         <td className="px-4 py-3 flex gap-2">
                           <button onClick={() => { setManageUser(u); setManageNewRole(u.role); }}
-                            className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${dark ? 'bg-gray-600 hover:bg-gray-500 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}>MANAGE</button>
+                            className={`text-xs font-bold px-3 py-1 rounded-lg transition-colors ${dark ? 'bg-[#252d45] hover:bg-[#2d3650] text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}>MANAGE</button>
                           {onVerifyUser && !u.isVerified && (
                             <button onClick={() => onVerifyUser(u.id)}
                               className="text-xs font-bold bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-colors">VERIFY</button>
@@ -295,7 +295,7 @@ export default function HeadAdminView({
               </div>
               {manageUser && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                  <div className={`${dark ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-2xl w-full max-w-sm p-6`}>
+                  <div className={`${dark ? 'bg-[#1a1f2e]' : 'bg-white'} rounded-2xl shadow-2xl w-full max-w-sm p-6`}>
                     <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 ${headingText}`}>Manage User</h3>
                     <p className={`text-sm mb-4 ${subText}`}>{manageUser.firstName} {manageUser.lastName} · {manageUser.email}</p>
                     <label className={`block text-[10px] uppercase tracking-wider mb-1 ${subText}`}>Change Role</label>
@@ -306,7 +306,7 @@ export default function HeadAdminView({
                       ))}
                     </select>
                     <div className="flex gap-2">
-                      <button onClick={() => setManageUser(null)} className={`flex-1 py-2 rounded-lg text-sm font-bold ${dark ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`}>Cancel</button>
+                      <button onClick={() => setManageUser(null)} className={`flex-1 py-2 rounded-lg text-sm font-bold ${dark ? 'bg-[#1e2438] text-gray-400' : 'bg-gray-100 text-gray-700'}`}>Cancel</button>
                       <button onClick={async () => { await onChangeUserRole(manageUser.id, manageNewRole); setManageUser(null); }}
                         className="flex-1 py-2 rounded-lg text-sm font-bold bg-purple-600 hover:bg-purple-700 text-white">Save</button>
                     </div>
@@ -326,7 +326,7 @@ export default function HeadAdminView({
               </div>
               <div className={`${cardBg} border rounded-2xl overflow-hidden shadow-sm`}>
                 <table className="w-full text-left text-sm">
-                  <thead className={`text-[10px] font-bold uppercase tracking-widest ${tableHead} ${dark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                  <thead className={`text-[10px] font-bold uppercase tracking-widest ${tableHead} ${dark ? 'bg-[#1e2438]/60' : 'bg-gray-50'}`}>
                     <tr>
                       <th className="px-4 py-3">User</th>
                       <th className="px-4 py-3">Email</th>
@@ -335,7 +335,7 @@ export default function HeadAdminView({
                       <th className="px-4 py-3">Verified</th>
                     </tr>
                   </thead>
-                  <tbody className={`divide-y ${dark ? 'divide-gray-700' : 'divide-gray-100'}`}>
+                  <tbody className={`divide-y ${dark ? 'divide-[#252d42]' : 'divide-gray-100'}`}>
                     {filteredUsers.map(u => (
                       <tr key={u.id} className={tableRow}>
                         <td className={`px-4 py-3 font-medium ${headingText}`}>{u.firstName} {u.lastName}</td>
@@ -376,7 +376,7 @@ export default function HeadAdminView({
               </div>
               {selectedRoomInfo && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                  <div className={`${dark ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-2xl w-full max-w-sm p-6`}>
+                  <div className={`${dark ? 'bg-[#1a1f2e]' : 'bg-white'} rounded-2xl shadow-2xl w-full max-w-sm p-6`}>
                     <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 ${headingText}`}>{selectedRoomInfo.name}</h3>
                     <p className={`text-[10px] uppercase tracking-wider mb-2 ${subText}`}>Who can book this room</p>
                     <div className="flex flex-col gap-2 mb-5">
@@ -390,7 +390,7 @@ export default function HeadAdminView({
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => setSelectedRoomInfo(null)} className={`flex-1 py-2 rounded-lg text-sm font-bold ${dark ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`}>Cancel</button>
+                      <button onClick={() => setSelectedRoomInfo(null)} className={`flex-1 py-2 rounded-lg text-sm font-bold ${dark ? 'bg-[#1e2438] text-gray-400' : 'bg-gray-100 text-gray-700'}`}>Cancel</button>
                       <button onClick={handleSaveRoomRoles} disabled={savingRoom}
                         className="flex-1 py-2 rounded-lg text-sm font-bold bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white">
                         {savingRoom ? 'Saving...' : 'Save'}
@@ -430,7 +430,7 @@ export default function HeadAdminView({
                       <th className="px-3 py-2 text-left">Status</th>
                     </tr>
                   </thead>
-                  <tbody className={`divide-y ${dark ? 'divide-gray-700' : 'divide-gray-100'}`}>
+                  <tbody className={`divide-y ${dark ? 'divide-[#252d42]' : 'divide-gray-100'}`}>
                     {[...reservations].sort((a,b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).slice(0, 10).map(r => (
                       <tr key={r.id} className={tableRow}>
                         <td className={`px-3 py-2 font-medium ${headingText}`}>{r.roomName}</td>

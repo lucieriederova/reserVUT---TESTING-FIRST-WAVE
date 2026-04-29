@@ -8,9 +8,16 @@ interface CalendarGridProps {
   userRole?: UserRole;
   startHour?: number;
   endHour?: number;
+  dark?: boolean;
 }
 
-function getTodayColors(role?: UserRole): { bg: string; text: string; header: string } {
+function getTodayColors(role?: UserRole, dark?: boolean): { bg: string; text: string; header: string } {
+  if (dark) {
+    if (role === 'CEO')        return { bg: 'bg-orange-950/25', text: 'text-orange-400', header: 'bg-orange-950/35' };
+    if (role === 'GUIDE')      return { bg: 'bg-purple-950/25', text: 'text-purple-400', header: 'bg-purple-950/35' };
+    if (role === 'HEAD_ADMIN') return { bg: 'bg-blue-950/25',   text: 'text-blue-400',   header: 'bg-blue-950/35' };
+    return { bg: 'bg-pink-950/25', text: 'text-pink-400', header: 'bg-pink-950/35' };
+  }
   if (role === 'CEO')        return { bg: 'bg-orange-50', text: 'text-orange-600', header: 'bg-orange-50' };
   if (role === 'GUIDE')      return { bg: 'bg-purple-50', text: 'text-purple-600', header: 'bg-purple-50' };
   if (role === 'HEAD_ADMIN') return { bg: 'bg-blue-50',   text: 'text-blue-600',   header: 'bg-blue-50' };
@@ -80,11 +87,20 @@ export default function CalendarGrid({
   userRole,
   startHour = 7,
   endHour = 21,
+  dark,
 }: CalendarGridProps) {
   const weekDates = getWeekDates(weekOffset);
   const HOURS = Array.from({ length: endHour - startHour }, (_, i) => i + startHour);
   const totalHeight = HOURS.length * ROW_HEIGHT;
-  const todayColors = getTodayColors(userRole);
+  const todayColors = getTodayColors(userRole, dark);
+
+  const cellBg = dark ? 'bg-[#1f2535]' : 'bg-white';
+  const borderCol = dark ? 'border-gray-700/40' : 'border-gray-200';
+  const borderHour = dark ? 'border-gray-700/25' : 'border-gray-100';
+  const timeText = dark ? 'text-gray-600' : 'text-gray-400';
+  const dayNameText = dark ? 'text-gray-500' : 'text-gray-500';
+  const dateText = dark ? 'text-gray-400' : 'text-gray-700';
+  const legendBg = dark ? 'bg-[#1a1f2e] border-gray-700/40 text-gray-500' : 'bg-white border-gray-100 text-gray-500';
 
   const getReservationsForDay = (day: Date) =>
     reservations.filter((r) => {
@@ -98,16 +114,16 @@ export default function CalendarGrid({
         <div className="grid" style={{ gridTemplateColumns: '48px repeat(7, 1fr)' }}>
 
           {/* Sticky header row */}
-          <div className="border-b border-r border-gray-200 h-8 bg-white sticky top-0 z-20" />
+          <div className={`border-b border-r ${borderCol} h-8 ${cellBg} sticky top-0 z-20`} />
           {weekDates.map((day, i) => {
             const isToday = sameLocalDate(day, new Date());
             return (
               <div
                 key={i}
-                className={`border-b border-r border-gray-200 h-8 flex flex-col items-center justify-center sticky top-0 z-20 ${isToday ? todayColors.header : 'bg-white'}`}
+                className={`border-b border-r ${borderCol} h-8 flex flex-col items-center justify-center sticky top-0 z-20 ${isToday ? todayColors.header : cellBg}`}
               >
-                <span className="text-[10px] font-semibold text-gray-500">{DAYS[i]}</span>
-                <span className={`text-[10px] font-bold ${isToday ? todayColors.text : 'text-gray-700'}`}>
+                <span className={`text-[10px] font-semibold ${dayNameText}`}>{DAYS[i]}</span>
+                <span className={`text-[10px] font-bold ${isToday ? todayColors.text : dateText}`}>
                   {day.getDate()}.{day.getMonth() + 1}.
                 </span>
               </div>
@@ -115,14 +131,14 @@ export default function CalendarGrid({
           })}
 
           {/* Time gutter */}
-          <div className="border-r border-gray-200 relative" style={{ height: totalHeight }}>
+          <div className={`border-r ${borderCol} relative`} style={{ height: totalHeight }}>
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="absolute w-full border-b border-gray-100 flex items-start justify-end pr-1 pt-0.5"
+                className={`absolute w-full border-b ${borderHour} flex items-start justify-end pr-1 pt-0.5`}
                 style={{ top: (hour - startHour) * ROW_HEIGHT, height: ROW_HEIGHT }}
               >
-                <span className="text-[9px] text-gray-400">{hour}:00</span>
+                <span className={`text-[9px] ${timeText}`}>{hour}:00</span>
               </div>
             ))}
           </div>
@@ -139,14 +155,14 @@ export default function CalendarGrid({
             return (
               <div
                 key={di}
-                className={`border-r border-gray-200 relative ${isToday ? todayColors.bg : ''}`}
+                className={`border-r ${borderCol} relative ${isToday ? todayColors.bg : ''}`}
                 style={{ height: totalHeight }}
               >
                 {/* Hour grid lines */}
                 {HOURS.map((hour) => (
                   <div
                     key={hour}
-                    className="absolute w-full border-b border-gray-100"
+                    className={`absolute w-full border-b ${borderHour}`}
                     style={{ top: (hour - startHour) * ROW_HEIGHT, height: ROW_HEIGHT }}
                   />
                 ))}
@@ -199,7 +215,7 @@ export default function CalendarGrid({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-gray-100 bg-white text-[10px] text-gray-500 flex-shrink-0">
+      <div className={`flex flex-wrap items-center gap-3 px-3 py-2 border-t ${legendBg} text-[10px] flex-shrink-0`}>
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded bg-emerald-500 inline-block flex-shrink-0" />
           My reservation
