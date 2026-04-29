@@ -200,7 +200,7 @@ export default function StudentView({
           </div>
 
           {/* ROOM SELECT + TYPE FILTER */}
-          <div className="px-5 mt-2 flex items-center gap-3 flex-wrap relative z-10">
+          <div className="px-5 mt-2 flex items-center gap-3 flex-wrap relative z-30">
             <div className="relative inline-block">
               <button onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
                 className={`flex items-center gap-2 border rounded-lg px-4 py-2 text-sm font-medium shadow-sm min-w-[180px] justify-between ${btnBorder}`}>
