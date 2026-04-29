@@ -181,8 +181,8 @@ export default function StudentView({
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-1 min-h-0">
+        <div className="flex-1 flex flex-col min-h-0">
 
           {/* Watermark + RULES */}
           <div className="relative px-5 pt-2 pb-0 flex items-center overflow-hidden">
