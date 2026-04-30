@@ -144,7 +144,7 @@ export default function StudentView({
   };
 
   return (
-    <div className={`min-h-screen ${bg} flex flex-col`}>
+    <div className={`h-[100dvh] overflow-hidden ${bg} flex flex-col`}>
 
       {/* TOP NAVBAR */}
       <div className={`${navBg} border-b px-4 sm:px-5 py-2.5 flex items-center justify-between`}>
@@ -267,9 +267,9 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* Calendar */}
-          <div className="px-3 sm:px-5 pt-3 pb-3 sm:pb-5 flex-1 flex flex-col">
-            <div className={`${cardBg} border rounded-2xl shadow-md flex-1 flex flex-col overflow-hidden`}>
+          {/* Calendar — edge-to-edge on mobile, card on desktop */}
+          <div className="flex-1 flex flex-col min-h-0 sm:px-5 sm:pt-3 sm:pb-5">
+            <div className={`flex-1 flex flex-col overflow-hidden ${dark ? 'bg-[#1a1f2e]' : 'bg-white'} sm:border sm:rounded-2xl sm:shadow-md ${dark ? 'sm:border-[#252d42]' : 'sm:border-gray-200'}`}>
               {/* Calendar header */}
               <div className={`px-4 sm:px-5 py-3 border-b ${dark ? 'border-[#252d42]' : 'border-gray-100'}`}>
                 {isMobile ? (
@@ -317,7 +317,7 @@ export default function StudentView({
                   </div>
                 )}
               </div>
-              <div className={`flex-1 overflow-auto rounded-b-2xl ${dark ? 'bg-[#1a1f2e]' : 'bg-white'}`}>
+              <div className="flex-1 min-h-0">
                 <CalendarGrid
                   reservations={filteredReservations}
                   weekOffset={isMobile ? 0 : currentWeekOffset}

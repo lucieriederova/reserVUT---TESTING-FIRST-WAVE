@@ -28,7 +28,7 @@ function getTodayColors(role?: UserRole, dark?: boolean): { bg: string; text: st
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const WEEK_ROW_H = 40;
-const DAY_ROW_H = 60;
+const DAY_ROW_H = 64;
 
 function getDayName(d: Date): string {
   return DAY_NAMES[d.getDay()];
@@ -79,12 +79,12 @@ function getReservationStyle(
   };
 }
 
-function getReservationColors(r: Reservation, isOwn: boolean): { bg: string; border: string } {
-  if (isOwn) return { bg: 'bg-emerald-500', border: 'border-l-emerald-600' };
-  if (r.priorityLevel === 4) return { bg: 'bg-blue-500', border: 'border-l-blue-700' };
-  if (r.priorityLevel === 3) return { bg: 'bg-purple-500', border: 'border-l-purple-700' };
-  if (r.priorityLevel === 2) return { bg: 'bg-orange-400', border: 'border-l-orange-600' };
-  return { bg: 'bg-red-400', border: 'border-l-red-600' };
+function getReservationColors(r: Reservation, isOwn: boolean): { bg: string; borderL: string } {
+  if (isOwn) return { bg: 'bg-emerald-500', borderL: 'border-l-emerald-700' };
+  if (r.priorityLevel === 4) return { bg: 'bg-blue-500', borderL: 'border-l-blue-700' };
+  if (r.priorityLevel === 3) return { bg: 'bg-purple-500', borderL: 'border-l-purple-700' };
+  if (r.priorityLevel === 2) return { bg: 'bg-orange-400', borderL: 'border-l-orange-600' };
+  return { bg: 'bg-red-400', borderL: 'border-l-red-600' };
 }
 
 export default function CalendarGrid({
@@ -105,183 +105,181 @@ export default function CalendarGrid({
   const HOURS = Array.from({ length: endHour - startHour }, (_, i) => i + startHour);
   const totalHeight = HOURS.length * rowH;
   const todayColors = getTodayColors(userRole, dark);
+  const gutterW = isSingleDay ? 52 : 48;
+  const cols = `${gutterW}px repeat(${dates.length}, 1fr)`;
 
+  // Scroll so current time is visible (~1.5h above now)
   useEffect(() => {
     if (!scrollRef.current) return;
     const now = new Date();
     const nowH = now.getHours() + now.getMinutes() / 60;
-    const scrollTo = Math.max(0, (nowH - startHour - 1.5) * rowH);
-    scrollRef.current.scrollTop = scrollTo;
+    scrollRef.current.scrollTop = Math.max(0, (nowH - startHour - 1.5) * rowH);
   }, [isSingleDay, startHour, rowH]);
 
-  const cellBg = dark ? 'bg-[#1f2535]' : 'bg-white';
-  const borderCol = dark ? 'border-gray-700/40' : 'border-gray-200';
-  const borderHour = dark ? 'border-gray-700/25' : 'border-gray-100';
+  const cellBg   = dark ? 'bg-[#1f2535]' : 'bg-white';
+  const borderC  = dark ? 'border-gray-700/40' : 'border-gray-200';
+  const borderH  = dark ? 'border-gray-700/20' : 'border-gray-100';
   const timeText = dark ? 'text-gray-600' : 'text-gray-400';
-  const dayNameText = dark ? 'text-gray-500' : 'text-gray-400';
+  const dayText  = dark ? 'text-gray-500' : 'text-gray-400';
   const dateText = dark ? 'text-gray-300' : 'text-gray-700';
   const legendBg = dark ? 'bg-[#1a1f2e] border-gray-700/40 text-gray-500' : 'bg-gray-50 border-gray-100 text-gray-400';
-  const gutterW = isSingleDay ? 52 : 48;
 
   const getReservationsForDay = (day: Date) =>
-    reservations.filter((r) => {
-      const start = new Date(r.startTime);
-      return sameLocalDate(start, day) && r.status === 'active';
-    });
+    reservations.filter(r => sameLocalDate(new Date(r.startTime), day) && r.status === 'active');
 
   return (
-    <div ref={scrollRef} className="overflow-auto h-full flex flex-col">
-      <div className="flex-1" style={{ minWidth: isSingleDay ? '0' : '600px' }}>
-        <div className="grid" style={{ gridTemplateColumns: `${gutterW}px repeat(${dates.length}, 1fr)` }}>
+    // h-full so this fills whatever container gives it height
+    <div className="h-full flex flex-col">
 
-          {/* Sticky header row */}
-          <div className={`border-b border-r ${borderCol} h-12 ${cellBg} sticky top-0 z-20`} />
-          {dates.map((day, i) => {
-            const isToday = sameLocalDate(day, new Date());
-            return (
-              <div
-                key={i}
-                className={`border-b border-r ${borderCol} h-12 flex flex-col items-center justify-center sticky top-0 z-20 ${isToday ? todayColors.header : cellBg}`}
-              >
-                <span className={`text-[11px] font-medium uppercase tracking-wide ${isToday ? todayColors.text : dayNameText}`}>{getDayName(day)}</span>
-                {isToday ? (
-                  <span className={`text-sm font-black w-7 h-7 flex items-center justify-center rounded-full mt-0.5 ${
-                    dark ? 'bg-purple-600 text-white' : 'bg-purple-600 text-white'
-                  }`}>
-                    {day.getDate()}
-                  </span>
-                ) : (
-                  <span className={`text-sm font-bold mt-0.5 ${dateText}`}>{day.getDate()}</span>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Time gutter */}
-          <div className={`border-r ${borderCol} relative`} style={{ height: totalHeight }}>
-            {HOURS.map((hour) => (
-              <div
-                key={hour}
-                className="absolute w-full flex items-start justify-end pr-2"
-                style={{ top: (hour - startHour) * rowH - 8, height: rowH }}
-              >
-                <span className={`text-[10px] font-medium ${timeText}`}>
-                  {hour < 10 ? `0${hour}:00` : `${hour}:00`}
+      {/* ── Fixed day-header row (not part of the scroll) ── */}
+      <div className={`grid flex-shrink-0 border-b ${borderC}`} style={{ gridTemplateColumns: cols }}>
+        <div className={`h-12 border-r ${borderC} ${cellBg}`} />
+        {dates.map((day, i) => {
+          const isToday = sameLocalDate(day, new Date());
+          return (
+            <div
+              key={i}
+              className={`h-12 border-r ${borderC} flex flex-col items-center justify-center ${isToday ? todayColors.header : cellBg}`}
+            >
+              <span className={`text-[11px] font-medium uppercase tracking-wide ${isToday ? todayColors.text : dayText}`}>
+                {getDayName(day)}
+              </span>
+              {isToday ? (
+                <span className="text-sm font-black w-7 h-7 flex items-center justify-center rounded-full mt-0.5 bg-purple-600 text-white leading-none">
+                  {day.getDate()}
                 </span>
-              </div>
-            ))}
-          </div>
+              ) : (
+                <span className={`text-sm font-bold mt-0.5 ${dateText}`}>{day.getDate()}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
-          {/* Day columns */}
-          {dates.map((day, di) => {
-            const dayReservations = getReservationsForDay(day);
-            const isToday = sameLocalDate(day, new Date());
-            const now = new Date();
-            const nowH = now.getHours() + now.getMinutes() / 60;
-            const showNowLine = isToday && nowH >= startHour && nowH <= endHour;
-            const nowTop = (nowH - startHour) * rowH;
+      {/* ── Scrollable time grid ── */}
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden"
+        style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+      >
+        <div style={{ minWidth: isSingleDay ? 0 : 600 }}>
+          <div className="grid" style={{ gridTemplateColumns: cols, height: totalHeight }}>
 
-            return (
-              <div
-                key={di}
-                className={`border-r ${borderCol} relative ${isToday ? todayColors.bg : ''}`}
-                style={{ height: totalHeight }}
-              >
-                {/* Hour lines */}
-                {HOURS.map((hour) => (
-                  <div key={hour}>
-                    <div
-                      className={`absolute w-full border-t ${borderHour}`}
-                      style={{ top: (hour - startHour) * rowH }}
-                    />
-                    {isSingleDay && (
-                      <div
-                        className="absolute w-full"
-                        style={{
-                          top: (hour - startHour) * rowH + rowH / 2,
-                          height: 1,
-                          background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
-                        }}
-                      />
-                    )}
-                  </div>
-                ))}
+            {/* Time gutter */}
+            <div className={`border-r ${borderC} relative flex-shrink-0`} style={{ height: totalHeight }}>
+              {HOURS.map(hour => (
+                <div
+                  key={hour}
+                  className="absolute w-full flex items-start justify-end pr-2"
+                  style={{ top: (hour - startHour) * rowH - 8, height: rowH }}
+                >
+                  <span className={`text-[10px] font-medium tabular-nums ${timeText}`}>
+                    {String(hour).padStart(2, '0')}:00
+                  </span>
+                </div>
+              ))}
+            </div>
 
-                {/* Current time indicator */}
-                {showNowLine && (
-                  <div
-                    className="absolute left-0 right-0 z-20 pointer-events-none flex items-center"
-                    style={{ top: nowTop }}
-                  >
-                    <div className="w-3 h-3 rounded-full bg-red-500 -ml-1.5 flex-shrink-0 shadow-sm" />
-                    <div className="flex-1 h-0.5 bg-red-500" />
-                  </div>
-                )}
+            {/* Day columns */}
+            {dates.map((day, di) => {
+              const dayRes = getReservationsForDay(day);
+              const isToday = sameLocalDate(day, new Date());
+              const now = new Date();
+              const nowH = now.getHours() + now.getMinutes() / 60;
+              const showNow = isToday && nowH >= startHour && nowH <= endHour;
+              const nowTop = (nowH - startHour) * rowH;
 
-                {/* Reservations */}
-                {dayReservations.map((r) => {
-                  const isOwn = r.userId === currentUserId;
-                  const start = new Date(r.startTime);
-                  const end = new Date(r.endTime);
-                  const startLabel = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
-                  const endLabel = `${String(end.getHours()).padStart(2, '00')}:${String(end.getMinutes()).padStart(2, '0')}`;
-                  const durationH = (end.getTime() - start.getTime()) / 3600000;
-                  const overlaps = dayReservations.filter((o) => {
-                    const os = new Date(o.startTime).getTime();
-                    const oe = new Date(o.endTime).getTime();
-                    return os < end.getTime() && oe > start.getTime();
-                  });
-                  const colCount = overlaps.length;
-                  const colIndex = overlaps.indexOf(r);
-                  const style = getReservationStyle(r, startHour, colIndex, colCount, rowH);
-                  const heightPx = style.height as number;
-                  const colors = getReservationColors(r, isOwn);
-                  const isVeryShort = heightPx < 28;
-                  const isShort = heightPx < (isSingleDay ? 52 : 30);
-
-                  return (
-                    <button
-                      key={r.id}
-                      onClick={() => onReservationClick(r)}
-                      style={style}
-                      className={`rounded-lg text-left overflow-hidden transition-all text-white shadow-sm hover:brightness-110 active:brightness-90 border-l-4 ${colors.bg} ${colors.border} ${isSingleDay ? 'px-2.5' : 'px-1.5'}`}
-                      title={`${r.roomName} · ${startLabel}–${endLabel}${r.description ? ' · ' + r.description : ''}`}
-                    >
-                      {isSingleDay ? (
-                        isVeryShort ? (
-                          <p className="text-[11px] font-bold truncate leading-none mt-0.5">{r.roomName}</p>
-                        ) : isShort ? (
-                          <div className="py-0.5">
-                            <p className="text-[12px] font-bold truncate leading-tight">{r.roomName}</p>
-                            <p className="text-[11px] opacity-90 leading-tight">{startLabel}–{endLabel}</p>
-                          </div>
-                        ) : (
-                          <div className="py-1">
-                            <p className="text-[13px] font-bold truncate leading-snug">{r.roomName}</p>
-                            <p className="text-[11px] opacity-90 leading-snug">{startLabel} – {endLabel}</p>
-                            {r.description && durationH >= 0.75 && (
-                              <p className="text-[11px] opacity-75 leading-snug truncate">{r.description}</p>
-                            )}
-                            {r.userName && !isOwn && durationH >= 1 && (
-                              <p className="text-[11px] opacity-70 leading-snug truncate">{r.userName}</p>
-                            )}
-                          </div>
-                        )
-                      ) : (
-                        <>
-                          <p className="text-[9px] font-bold truncate leading-tight mt-0.5">{r.roomName}</p>
-                          {!isShort && <p className="text-[9px] truncate opacity-90 leading-tight">{startLabel}–{endLabel}</p>}
-                          {!isShort && r.userName && !isOwn && (
-                            <p className="text-[9px] truncate opacity-75 leading-tight">{r.userName}</p>
-                          )}
-                        </>
+              return (
+                <div
+                  key={di}
+                  className={`border-r ${borderC} relative ${isToday ? todayColors.bg : ''}`}
+                  style={{ height: totalHeight }}
+                >
+                  {/* Hour + half-hour lines */}
+                  {HOURS.map(hour => (
+                    <div key={hour}>
+                      <div className={`absolute w-full border-t ${borderH}`} style={{ top: (hour - startHour) * rowH }} />
+                      {isSingleDay && (
+                        <div
+                          className="absolute w-full"
+                          style={{
+                            top: (hour - startHour) * rowH + rowH / 2,
+                            height: 1,
+                            background: dark ? 'rgba(255,255,255,0.035)' : 'rgba(0,0,0,0.04)',
+                          }}
+                        />
                       )}
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })}
+                    </div>
+                  ))}
+
+                  {/* Current-time indicator */}
+                  {showNow && (
+                    <div className="absolute left-0 right-0 z-20 pointer-events-none flex items-center" style={{ top: nowTop }}>
+                      <div className="w-3 h-3 rounded-full bg-red-500 -ml-1.5 flex-shrink-0" />
+                      <div className="flex-1 h-[2px] bg-red-500" />
+                    </div>
+                  )}
+
+                  {/* Events */}
+                  {dayRes.map(r => {
+                    const isOwn = r.userId === currentUserId;
+                    const start = new Date(r.startTime);
+                    const end = new Date(r.endTime);
+                    const sl = `${String(start.getHours()).padStart(2,'0')}:${String(start.getMinutes()).padStart(2,'0')}`;
+                    const el = `${String(end.getHours()).padStart(2,'00')}:${String(end.getMinutes()).padStart(2,'0')}`;
+                    const durH = (end.getTime() - start.getTime()) / 3600000;
+                    const overlaps = dayRes.filter(o => {
+                      const os = new Date(o.startTime).getTime();
+                      const oe = new Date(o.endTime).getTime();
+                      return os < end.getTime() && oe > start.getTime();
+                    });
+                    const style = getReservationStyle(r, startHour, overlaps.indexOf(r), overlaps.length, rowH);
+                    const h = style.height as number;
+                    const { bg, borderL } = getReservationColors(r, isOwn);
+                    const tiny = h < 28;
+                    const short = h < (isSingleDay ? 56 : 30);
+
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => onReservationClick(r)}
+                        style={style}
+                        className={`text-white text-left overflow-hidden rounded-lg border-l-4 shadow-sm transition-all hover:brightness-110 active:brightness-90 ${bg} ${borderL} ${isSingleDay ? 'px-2' : 'px-1.5'}`}
+                        title={`${r.roomName} · ${sl}–${el}${r.description ? ' · ' + r.description : ''}`}
+                      >
+                        {isSingleDay ? (
+                          tiny ? (
+                            <p className="text-[11px] font-bold truncate leading-none mt-px">{r.roomName}</p>
+                          ) : short ? (
+                            <div className="py-0.5">
+                              <p className="text-xs font-bold truncate leading-tight">{r.roomName}</p>
+                              <p className="text-[11px] opacity-90 leading-tight">{sl}–{el}</p>
+                            </div>
+                          ) : (
+                            <div className="py-1 flex flex-col gap-0.5">
+                              <p className="text-[13px] font-bold truncate leading-snug">{r.roomName}</p>
+                              <p className="text-[11px] opacity-90 leading-snug">{sl} – {el}</p>
+                              {r.description && durH >= 0.75 && (
+                                <p className="text-[11px] opacity-70 truncate leading-snug">{r.description}</p>
+                              )}
+                              {r.userName && !isOwn && durH >= 1 && (
+                                <p className="text-[11px] opacity-70 truncate leading-snug">{r.userName}</p>
+                              )}
+                            </div>
+                          )
+                        ) : (
+                          <div className="py-px">
+                            <p className="text-[9px] font-bold truncate leading-tight">{r.roomName}</p>
+                            {!short && <p className="text-[9px] opacity-90 truncate leading-tight">{sl}–{el}</p>}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
