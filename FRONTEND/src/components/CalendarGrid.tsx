@@ -128,8 +128,7 @@ export default function CalendarGrid({
     reservations.filter(r => sameLocalDate(new Date(r.startTime), day) && r.status === 'active');
 
   return (
-    // h-full so this fills whatever container gives it height
-    <div className="h-full flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0">
 
       {/* ── Fixed day-header row (not part of the scroll) ── */}
       <div className={`grid flex-shrink-0 border-b ${borderC}`} style={{ gridTemplateColumns: cols }}>
