@@ -220,10 +220,11 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* ROOM SELECT + TYPE FILTER — single scrollable row */}
+          {/* ROOM SELECT + TYPE FILTER */}
           <div className="px-4 sm:px-5 mt-2 relative z-30">
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-nowrap items-center">
-              {/* Room chip */}
+            {/* Outer row: room chip (not in overflow container) + scrollable type chips */}
+            <div className="flex items-center gap-1.5">
+              {/* Room chip — lives outside overflow-x-auto so the dropdown isn't clipped */}
               <div className="relative flex-shrink-0">
                 <button
                   onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
@@ -253,17 +254,19 @@ export default function StudentView({
               </div>
               {/* Divider */}
               <div className={`w-px h-4 flex-shrink-0 ${dark ? 'bg-gray-700' : 'bg-gray-300'}`} />
-              {/* Type chips */}
-              {TYPE_FILTER_OPTIONS.map(({ value, label }) => (
-                <button key={value} onClick={() => setTypeFilter(value)}
-                  className={`px-3 py-1.5 text-[11px] font-bold rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
-                    typeFilter === value
-                      ? 'bg-purple-600 text-white'
-                      : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
-                  }`}>
-                  {label}
-                </button>
-              ))}
+              {/* Type chips — scrollable, but the room dropdown is outside this container */}
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-nowrap flex-1">
+                {TYPE_FILTER_OPTIONS.map(({ value, label }) => (
+                  <button key={value} onClick={() => setTypeFilter(value)}
+                    className={`px-3 py-1.5 text-[11px] font-bold rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
+                      typeFilter === value
+                        ? 'bg-purple-600 text-white'
+                        : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
+                    }`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
