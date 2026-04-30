@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { User, Reservation, ALL_ROOMS, ReservationType } from './types';
 import BookingModal from './BookingModal';
 import MyReservationModal from './MyReservationModal';
@@ -46,6 +46,25 @@ export default function StudentView({
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [typeFilter, setTypeFilter] = useState<ReservationType | 'ALL'>('ALL');
   const [dark, setDark] = useState(() => localStorage.getItem('reservut_dark') === 'true');
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const [mobileDayOffset, setMobileDayOffset] = useState(0); // days from today
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  const mobileDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + mobileDayOffset);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [mobileDayOffset]);
+
+  const mobileDateLabel = mobileDate.toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'numeric',
+  });
 
   const toggleDark = () => {
     setDark(prev => {
@@ -245,22 +264,58 @@ export default function StudentView({
           {/* Calendar */}
           <div className="px-4 sm:px-5 pt-3 pb-4 sm:pb-5 flex-1 flex flex-col">
             <div className={`${cardBg} border rounded-2xl shadow-md flex-1 flex flex-col overflow-hidden`}>
-              {/* Calendar header — stacks on mobile */}
-              <div className={`flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-5 py-3 gap-2 border-b ${dark ? 'border-[#252d42]' : 'border-gray-100'}`}>
-                <span className={`text-sm sm:text-base font-black uppercase tracking-widest ${headingText}`}>CALENDAR</span>
-                <div className="flex items-center justify-between sm:justify-end gap-2">
-                  <WeekNavigator offset={currentWeekOffset} onChange={setCurrentWeekOffset} />
-                  <button onClick={() => setShowBooking(true)}
-                    className={`flex items-center gap-1.5 ${bookingBtnClass} text-white font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-full shadow transition-colors`}>
-                    <span className="text-base leading-none">+</span>
-                    <span className="hidden xs:inline">NEW </span>BOOKING
-                  </button>
-                </div>
+              {/* Calendar header */}
+              <div className={`px-4 sm:px-5 py-3 border-b ${dark ? 'border-[#252d42]' : 'border-gray-100'}`}>
+                {isMobile ? (
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Day navigator */}
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setMobileDayOffset(d => d - 1)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-lg font-bold transition-colors ${dark ? 'text-gray-400 hover:bg-[#252d45]' : 'text-gray-500 hover:bg-gray-100'}`}
+                      >‹</button>
+                      <div className="text-center min-w-[130px]">
+                        <p className={`text-sm font-bold capitalize leading-tight ${headingText}`}>{mobileDateLabel}</p>
+                        {mobileDayOffset !== 0 && (
+                          <button
+                            onClick={() => setMobileDayOffset(0)}
+                            className="text-[10px] text-purple-500 hover:text-purple-400 font-semibold leading-tight"
+                          >Today</button>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setMobileDayOffset(d => d + 1)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-lg font-bold transition-colors ${dark ? 'text-gray-400 hover:bg-[#252d45]' : 'text-gray-500 hover:bg-gray-100'}`}
+                      >›</button>
+                    </div>
+                    {/* Booking button */}
+                    <button
+                      onClick={() => setShowBooking(true)}
+                      className={`flex items-center gap-1 ${bookingBtnClass} text-white font-bold text-xs uppercase tracking-wide px-3 py-2 rounded-full shadow transition-colors flex-shrink-0`}
+                    >
+                      <span className="text-sm leading-none">+</span> BOOKING
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-base font-black uppercase tracking-widest ${headingText}`}>CALENDAR</span>
+                    <div className="flex items-center gap-3">
+                      <WeekNavigator offset={currentWeekOffset} onChange={setCurrentWeekOffset} />
+                      <button
+                        onClick={() => setShowBooking(true)}
+                        className={`flex items-center gap-1.5 ${bookingBtnClass} text-white font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-full shadow transition-colors`}
+                      >
+                        <span className="text-base leading-none">+</span> NEW BOOKING
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className={`flex-1 overflow-auto rounded-b-2xl ${dark ? 'bg-[#1a1f2e]' : 'bg-gray-100'}`}>
                 <CalendarGrid
                   reservations={filteredReservations}
-                  weekOffset={currentWeekOffset}
+                  weekOffset={isMobile ? 0 : currentWeekOffset}
+                  dayDates={isMobile ? [mobileDate] : undefined}
                   onReservationClick={handleCalendarClick}
                   currentUserId={user.id}
                   userRole={user.role}
