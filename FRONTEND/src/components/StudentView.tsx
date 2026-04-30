@@ -80,7 +80,6 @@ export default function StudentView({
   const cardBg = dark ? 'bg-[#1a1f2e] border-[#252d42]' : 'bg-white border-gray-200';
   const headingText = dark ? 'text-gray-300' : 'text-gray-900';
   const subText = dark ? 'text-gray-500' : 'text-gray-500';
-  const btnBorder = dark ? 'bg-[#1e2438] border-[#2d3650] text-gray-400 hover:bg-[#252d45]' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50';
   const dropdownBg = dark ? 'bg-[#1e2438] border-[#2d3650]' : 'bg-white border-gray-200';
   const dropdownItem = dark ? 'text-gray-400 hover:bg-[#252d45] border-[#2d3650]' : 'text-gray-700 hover:bg-gray-50 border-gray-100';
 
@@ -206,8 +205,8 @@ export default function StudentView({
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 flex flex-col min-h-0">
 
-          {/* RULES — watermark hidden on mobile */}
-          <div className="relative px-4 sm:px-5 pt-2 pb-0 flex items-center overflow-hidden">
+          {/* RULES — hidden on mobile */}
+          <div className="hidden sm:flex relative px-4 sm:px-5 pt-2 pb-0 items-center overflow-hidden">
             <div className="hidden sm:block select-none pointer-events-none flex-shrink-0">
               <span className={`block font-black uppercase leading-none ${watermarkInfo.color}`}
                 style={{ fontSize: 'clamp(70px, 13vw, 140px)', opacity: 0.35, letterSpacing: '0.02em' }}>
@@ -221,39 +220,46 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* ROOM SELECT + TYPE FILTER */}
-          <div className="px-4 sm:px-5 mt-2 flex flex-col sm:flex-row sm:items-center gap-2 relative z-30">
-            {/* Room dropdown — full width on mobile */}
-            <div className="relative w-full sm:w-auto sm:inline-block">
-              <button onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
-                className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm w-full sm:min-w-[180px] justify-between ${btnBorder}`}>
-                <span>{selectedRoom || 'SELECT ROOM'}</span>
-                <span className={`text-xs ${subText}`}>{roomDropdownOpen ? '▲' : '▼'}</span>
-              </button>
-              {roomDropdownOpen && (
-                <div className={`absolute top-full left-0 mt-2 border rounded-xl shadow-xl z-50 w-full overflow-hidden ${dropdownBg}`} style={{ minWidth: '180px' }}>
-                  <button onClick={() => { setSelectedRoom(''); setRoomDropdownOpen(false); }}
-                    className={`w-full text-left px-4 py-3 text-sm font-medium border-b ${dropdownItem}`}>
-                    All rooms
-                  </button>
-                  {ALL_ROOMS.map((room) => (
-                    <button key={room} onClick={() => { setSelectedRoom(room); setRoomDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-3 text-sm border-b last:border-0 ${dropdownItem} ${selectedRoom === room ? 'font-semibold' : ''}`}>
-                      {room}
+          {/* ROOM SELECT + TYPE FILTER — single scrollable row */}
+          <div className="px-4 sm:px-5 mt-2 relative z-30">
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-nowrap items-center">
+              {/* Room chip */}
+              <div className="relative flex-shrink-0">
+                <button
+                  onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold whitespace-nowrap border transition-colors ${
+                    selectedRoom
+                      ? 'bg-purple-600 text-white border-purple-600'
+                      : dark ? 'bg-[#1e2438] text-gray-400 border-[#2d3650] hover:bg-[#252d45]' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {selectedRoom || 'All rooms'}
+                  <span className="text-[9px] opacity-60">{roomDropdownOpen ? '▲' : '▼'}</span>
+                </button>
+                {roomDropdownOpen && (
+                  <div className={`absolute top-full left-0 mt-2 border rounded-xl shadow-xl z-50 overflow-hidden ${dropdownBg}`} style={{ minWidth: '200px' }}>
+                    <button onClick={() => { setSelectedRoom(''); setRoomDropdownOpen(false); }}
+                      className={`w-full text-left px-4 py-3 text-sm font-medium border-b ${dropdownItem}`}>
+                      All rooms
                     </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Type filter — horizontal scroll on mobile (no wrap) */}
-            <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide flex-nowrap sm:flex-wrap">
+                    {ALL_ROOMS.map((room) => (
+                      <button key={room} onClick={() => { setSelectedRoom(room); setRoomDropdownOpen(false); }}
+                        className={`w-full text-left px-4 py-3 text-sm border-b last:border-0 ${dropdownItem} ${selectedRoom === room ? 'font-semibold' : ''}`}>
+                        {room}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* Divider */}
+              <div className={`w-px h-4 flex-shrink-0 ${dark ? 'bg-gray-700' : 'bg-gray-300'}`} />
+              {/* Type chips */}
               {TYPE_FILTER_OPTIONS.map(({ value, label }) => (
                 <button key={value} onClick={() => setTypeFilter(value)}
-                  className={`px-3 py-1.5 text-[10px] font-bold rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
+                  className={`px-3 py-1.5 text-[11px] font-bold rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
                     typeFilter === value
                       ? 'bg-purple-600 text-white'
-                      : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
                   }`}>
                   {label}
                 </button>
@@ -262,7 +268,7 @@ export default function StudentView({
           </div>
 
           {/* Calendar */}
-          <div className="px-4 sm:px-5 pt-3 pb-4 sm:pb-5 flex-1 flex flex-col">
+          <div className="px-3 sm:px-5 pt-3 pb-3 sm:pb-5 flex-1 flex flex-col">
             <div className={`${cardBg} border rounded-2xl shadow-md flex-1 flex flex-col overflow-hidden`}>
               {/* Calendar header */}
               <div className={`px-4 sm:px-5 py-3 border-b ${dark ? 'border-[#252d42]' : 'border-gray-100'}`}>
@@ -311,7 +317,7 @@ export default function StudentView({
                   </div>
                 )}
               </div>
-              <div className={`flex-1 overflow-auto rounded-b-2xl ${dark ? 'bg-[#1a1f2e]' : 'bg-gray-100'}`}>
+              <div className={`flex-1 overflow-auto rounded-b-2xl ${dark ? 'bg-[#1a1f2e]' : 'bg-white'}`}>
                 <CalendarGrid
                   reservations={filteredReservations}
                   weekOffset={isMobile ? 0 : currentWeekOffset}
@@ -327,21 +333,19 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* MOBILE BOTTOM SECTION — upcoming + logout, hidden on desktop */}
-          <div className={`lg:hidden px-4 pb-4 flex flex-col gap-2`}>
-            <div className={`${cardBg} border rounded-2xl px-4 py-3 flex items-center justify-between`}>
-              <p className={`text-xs font-black uppercase tracking-widest ${headingText}`}>UPCOMING</p>
-              {upcomingReservations.length === 0
-                ? <p className={`text-xs italic ${subText}`}>No upcoming</p>
-                : <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className={`text-xs font-medium ${subText}`}>{upcomingReservations.length} reservation{upcomingReservations.length > 1 ? 's' : ''}</span>
-                  </div>
-              }
+          {/* MOBILE BOTTOM BAR — compact single row, hidden on desktop */}
+          <div className={`sm:hidden px-4 pb-3 flex items-center gap-2`}>
+            <div className={`${cardBg} border rounded-xl px-3 py-2 flex-1 flex items-center gap-2`}>
+              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${upcomingReservations.length > 0 ? 'bg-green-500' : 'bg-gray-400'}`} />
+              <span className={`text-xs ${subText}`}>
+                {upcomingReservations.length > 0
+                  ? `${upcomingReservations.length} upcoming`
+                  : 'No upcoming reservations'}
+              </span>
             </div>
             <button onClick={onLogout}
-              className={`${cardBg} border rounded-2xl px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold transition ${dark ? 'text-gray-400 hover:bg-[#1e2438]' : 'text-gray-600 hover:bg-gray-50'}`}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              className={`${cardBg} border rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs font-semibold flex-shrink-0 transition ${dark ? 'text-gray-400 hover:bg-[#1e2438]' : 'text-gray-600 hover:bg-gray-50'}`}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                 <polyline points="16 17 21 12 16 7"/>
                 <line x1="21" y1="12" x2="9" y2="12"/>
