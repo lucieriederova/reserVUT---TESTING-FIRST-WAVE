@@ -130,30 +130,32 @@ export default function CalendarGrid({
   return (
     <div className="flex-1 flex flex-col min-h-0">
 
-      {/* ── Fixed day-header row (not part of the scroll) ── */}
-      <div className={`grid flex-shrink-0 border-b ${borderC}`} style={{ gridTemplateColumns: cols }}>
-        <div className={`h-12 border-r ${borderC} ${cellBg}`} />
-        {dates.map((day, i) => {
-          const isToday = sameLocalDate(day, new Date());
-          return (
-            <div
-              key={i}
-              className={`h-12 border-r ${borderC} flex flex-col items-center justify-center ${isToday ? todayColors.header : cellBg}`}
-            >
-              <span className={`text-[11px] font-medium uppercase tracking-wide ${isToday ? todayColors.text : dayText}`}>
-                {getDayName(day)}
-              </span>
-              {isToday ? (
-                <span className="text-sm font-black w-7 h-7 flex items-center justify-center rounded-full mt-0.5 bg-purple-600 text-white leading-none">
-                  {day.getDate()}
+      {/* ── Fixed day-header row — week view only (single-day nav is in the parent header) ── */}
+      {!isSingleDay && (
+        <div className={`grid flex-shrink-0 border-b ${borderC}`} style={{ gridTemplateColumns: cols }}>
+          <div className={`h-12 border-r ${borderC} ${cellBg}`} />
+          {dates.map((day, i) => {
+            const isToday = sameLocalDate(day, new Date());
+            return (
+              <div
+                key={i}
+                className={`h-12 border-r ${borderC} flex flex-col items-center justify-center ${isToday ? todayColors.header : cellBg}`}
+              >
+                <span className={`text-[11px] font-medium uppercase tracking-wide ${isToday ? todayColors.text : dayText}`}>
+                  {getDayName(day)}
                 </span>
-              ) : (
-                <span className={`text-sm font-bold mt-0.5 ${dateText}`}>{day.getDate()}</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                {isToday ? (
+                  <span className="text-sm font-black w-7 h-7 flex items-center justify-center rounded-full mt-0.5 bg-purple-600 text-white leading-none">
+                    {day.getDate()}
+                  </span>
+                ) : (
+                  <span className={`text-sm font-bold mt-0.5 ${dateText}`}>{day.getDate()}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* ── Scrollable time grid ── */}
       <div

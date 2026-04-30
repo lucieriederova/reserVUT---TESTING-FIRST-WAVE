@@ -192,6 +192,15 @@ export default function StudentView({
             </p>
             <p className={`text-xs leading-tight hidden sm:block ${subText}`} style={{ WebkitUserSelect: 'none', pointerEvents: 'none' }}>{user.email}</p>
           </div>
+          {/* Logout — mobile only, in navbar */}
+          <button onClick={onLogout} title="Log out"
+            className={`sm:hidden p-1.5 rounded-lg transition-colors ${dark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
           <button onClick={() => setShowProfile(true)}
             className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-purple-400 transition flex-shrink-0 ${dark ? 'bg-[#252d45]' : 'bg-gray-200'}`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -220,48 +229,55 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* ROOM SELECT + TYPE FILTER — wrapping chips, all visible */}
-          <div className="px-4 sm:px-5 mt-2 relative z-30">
-            <div className="flex flex-wrap gap-1.5 items-center">
-              {/* Room chip — dropdown is not inside overflow, so it's never clipped */}
-              <div className="relative">
-                <button
-                  onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold whitespace-nowrap border transition-colors ${
-                    selectedRoom
-                      ? 'bg-purple-600 text-white border-purple-600'
-                      : dark ? 'bg-[#1e2438] text-gray-400 border-[#2d3650] hover:bg-[#252d45]' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {selectedRoom || 'All rooms'}
-                  <span className="text-[9px] opacity-60">{roomDropdownOpen ? '▲' : '▼'}</span>
-                </button>
-                {roomDropdownOpen && (
-                  <div className={`absolute top-full left-0 mt-2 border rounded-xl shadow-xl z-50 overflow-hidden ${dropdownBg}`} style={{ minWidth: '200px' }}>
-                    <button onClick={() => { setSelectedRoom(''); setRoomDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-3 text-sm font-medium border-b ${dropdownItem}`}>
-                      All rooms
+          {/* ROOM SELECT + TYPE FILTER — single compact row */}
+          <div className="px-4 sm:px-5 mt-1.5 relative z-30 flex items-center gap-1.5">
+            {/* Room chip — outside overflow so dropdown isn't clipped */}
+            <div className="relative flex-shrink-0">
+              <button
+                onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
+                className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold whitespace-nowrap border transition-colors ${
+                  selectedRoom
+                    ? 'bg-purple-600 text-white border-purple-600'
+                    : dark ? 'bg-[#1e2438] text-gray-400 border-[#2d3650] hover:bg-[#252d45]' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {selectedRoom || 'All rooms'}
+                <span className="text-[8px] opacity-60">{roomDropdownOpen ? '▲' : '▼'}</span>
+              </button>
+              {roomDropdownOpen && (
+                <div className={`absolute top-full left-0 mt-2 border rounded-xl shadow-xl z-50 overflow-hidden ${dropdownBg}`} style={{ minWidth: '200px' }}>
+                  <button onClick={() => { setSelectedRoom(''); setRoomDropdownOpen(false); }}
+                    className={`w-full text-left px-4 py-3 text-sm font-medium border-b ${dropdownItem}`}>
+                    All rooms
+                  </button>
+                  {ALL_ROOMS.map((room) => (
+                    <button key={room} onClick={() => { setSelectedRoom(room); setRoomDropdownOpen(false); }}
+                      className={`w-full text-left px-4 py-3 text-sm border-b last:border-0 ${dropdownItem} ${selectedRoom === room ? 'font-semibold' : ''}`}>
+                      {room}
                     </button>
-                    {ALL_ROOMS.map((room) => (
-                      <button key={room} onClick={() => { setSelectedRoom(room); setRoomDropdownOpen(false); }}
-                        className={`w-full text-left px-4 py-3 text-sm border-b last:border-0 ${dropdownItem} ${selectedRoom === room ? 'font-semibold' : ''}`}>
-                        {room}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className={`w-px h-3.5 flex-shrink-0 ${dark ? 'bg-gray-700' : 'bg-gray-300'}`} />
+            {/* Type chips — scrollable single row, gradient fade shows there's more */}
+            <div className="relative flex-1 min-w-0">
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide flex-nowrap">
+                {TYPE_FILTER_OPTIONS.map(({ value, label }) => (
+                  <button key={value} onClick={() => setTypeFilter(value)}
+                    className={`px-2.5 py-1 text-[10px] font-bold rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
+                      typeFilter === value
+                        ? 'bg-purple-600 text-white'
+                        : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
+                    }`}>
+                    {label}
+                  </button>
+                ))}
               </div>
-              {/* Type chips — all visible, wrap to next line if needed */}
-              {TYPE_FILTER_OPTIONS.map(({ value, label }) => (
-                <button key={value} onClick={() => setTypeFilter(value)}
-                  className={`px-3 py-1.5 text-[11px] font-bold rounded-full transition-colors whitespace-nowrap ${
-                    typeFilter === value
-                      ? 'bg-purple-600 text-white'
-                      : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
-                  }`}>
-                  {label}
-                </button>
-              ))}
+              {/* Fade hint — shows more chips exist off-screen */}
+              <div className={`absolute right-0 top-0 bottom-0 w-6 pointer-events-none ${
+                dark ? 'bg-gradient-to-l from-[#141720]' : 'bg-gradient-to-l from-white'
+              }`} />
             </div>
           </div>
 
@@ -331,8 +347,8 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* MOBILE BOTTOM BAR — compact single row, hidden on desktop */}
-          <div className={`sm:hidden px-4 pb-3 flex items-center gap-2`}>
+          {/* MOBILE BOTTOM BAR — hidden (logout moved to navbar) */}
+          <div className={`hidden sm:flex px-4 pb-3 items-center gap-2`}>
             <div className={`${cardBg} border rounded-xl px-3 py-2 flex-1 flex items-center gap-2`}>
               <span className={`w-2 h-2 rounded-full flex-shrink-0 ${upcomingReservations.length > 0 ? 'bg-green-500' : 'bg-gray-400'}`} />
               <span className={`text-xs ${subText}`}>
