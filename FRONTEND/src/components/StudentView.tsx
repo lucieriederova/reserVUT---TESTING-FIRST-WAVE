@@ -220,12 +220,11 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* ROOM SELECT + TYPE FILTER */}
+          {/* ROOM SELECT + TYPE FILTER — wrapping chips, all visible */}
           <div className="px-4 sm:px-5 mt-2 relative z-30">
-            {/* Outer row: room chip (not in overflow container) + scrollable type chips */}
-            <div className="flex items-center gap-1.5">
-              {/* Room chip — lives outside overflow-x-auto so the dropdown isn't clipped */}
-              <div className="relative flex-shrink-0">
+            <div className="flex flex-wrap gap-1.5 items-center">
+              {/* Room chip — dropdown is not inside overflow, so it's never clipped */}
+              <div className="relative">
                 <button
                   onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
                   className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold whitespace-nowrap border transition-colors ${
@@ -252,21 +251,17 @@ export default function StudentView({
                   </div>
                 )}
               </div>
-              {/* Divider */}
-              <div className={`w-px h-4 flex-shrink-0 ${dark ? 'bg-gray-700' : 'bg-gray-300'}`} />
-              {/* Type chips — scrollable, but the room dropdown is outside this container */}
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-nowrap flex-1">
-                {TYPE_FILTER_OPTIONS.map(({ value, label }) => (
-                  <button key={value} onClick={() => setTypeFilter(value)}
-                    className={`px-3 py-1.5 text-[11px] font-bold rounded-full transition-colors whitespace-nowrap flex-shrink-0 ${
-                      typeFilter === value
-                        ? 'bg-purple-600 text-white'
-                        : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
-                    }`}>
-                    {label}
-                  </button>
-                ))}
-              </div>
+              {/* Type chips — all visible, wrap to next line if needed */}
+              {TYPE_FILTER_OPTIONS.map(({ value, label }) => (
+                <button key={value} onClick={() => setTypeFilter(value)}
+                  className={`px-3 py-1.5 text-[11px] font-bold rounded-full transition-colors whitespace-nowrap ${
+                    typeFilter === value
+                      ? 'bg-purple-600 text-white'
+                      : dark ? 'bg-[#1e2438] text-gray-500 hover:bg-[#252d45]' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
+                  }`}>
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -276,31 +271,31 @@ export default function StudentView({
               {/* Calendar header */}
               <div className={`px-4 sm:px-5 py-3 border-b ${dark ? 'border-[#252d42]' : 'border-gray-100'}`}>
                 {isMobile ? (
-                  <div className="flex items-center justify-between gap-2">
-                    {/* Day navigator */}
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => setMobileDayOffset(d => d - 1)}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-lg font-bold transition-colors ${dark ? 'text-gray-400 hover:bg-[#252d45]' : 'text-gray-500 hover:bg-gray-100'}`}
-                      >‹</button>
-                      <div className="text-center min-w-[130px]">
-                        <p className={`text-sm font-bold capitalize leading-tight ${headingText}`}>{mobileDateLabel}</p>
-                        {mobileDayOffset !== 0 && (
-                          <button
-                            onClick={() => setMobileDayOffset(0)}
-                            className="text-[10px] text-purple-500 hover:text-purple-400 font-semibold leading-tight"
-                          >Today</button>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => setMobileDayOffset(d => d + 1)}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-lg font-bold transition-colors ${dark ? 'text-gray-400 hover:bg-[#252d45]' : 'text-gray-500 hover:bg-gray-100'}`}
-                      >›</button>
+                  <div className="flex items-center gap-1">
+                    {/* Prev arrow */}
+                    <button
+                      onClick={() => setMobileDayOffset(d => d - 1)}
+                      className={`w-9 h-9 flex items-center justify-center rounded-xl text-xl font-bold flex-shrink-0 transition-colors ${dark ? 'text-gray-400 hover:bg-[#252d45]' : 'text-gray-500 hover:bg-gray-100'}`}
+                    >‹</button>
+                    {/* Centered date label */}
+                    <div className="flex-1 text-center">
+                      <p className={`text-[15px] font-bold capitalize leading-tight ${headingText}`}>{mobileDateLabel}</p>
+                      {mobileDayOffset !== 0 && (
+                        <button
+                          onClick={() => setMobileDayOffset(0)}
+                          className="text-[11px] text-purple-500 hover:text-purple-400 font-semibold leading-none"
+                        >Today</button>
+                      )}
                     </div>
+                    {/* Next arrow */}
+                    <button
+                      onClick={() => setMobileDayOffset(d => d + 1)}
+                      className={`w-9 h-9 flex items-center justify-center rounded-xl text-xl font-bold flex-shrink-0 transition-colors ${dark ? 'text-gray-400 hover:bg-[#252d45]' : 'text-gray-500 hover:bg-gray-100'}`}
+                    >›</button>
                     {/* Booking button */}
                     <button
                       onClick={() => setShowBooking(true)}
-                      className={`flex items-center gap-1 ${bookingBtnClass} text-white font-bold text-xs uppercase tracking-wide px-3 py-2 rounded-full shadow transition-colors flex-shrink-0`}
+                      className={`flex items-center gap-1 ${bookingBtnClass} text-white font-bold text-xs uppercase tracking-wide px-3 py-2 rounded-full shadow transition-colors flex-shrink-0 ml-1`}
                     >
                       <span className="text-sm leading-none">+</span> BOOKING
                     </button>
