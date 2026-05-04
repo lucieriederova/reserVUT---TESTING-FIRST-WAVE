@@ -81,6 +81,13 @@ export default function StudentView({
     return `${fmt(monday)}-${fmt(sunday)}`;
   }, [mobileDate]);
 
+  const bgFontSize = useMemo(() => {
+    const roleText = user.role === 'CEO' ? 'LEADER' : user.role === 'GUIDE' ? 'GUIDE' : 'STUDENT';
+    const text = mobileTab === 'events' ? 'EVENTS' : roleText;
+    const targetWidth = (typeof window !== 'undefined' ? window.innerWidth : 390) * 0.92;
+    return Math.min(Math.floor(targetWidth / (text.length * 0.62)), 160);
+  }, [mobileTab, user.role]);
+
   const roleAccent = {
     STUDENT: { bg: 'bg-pink-500', text: 'text-pink-500', light: 'text-pink-200' },
     CEO: { bg: 'bg-orange-500', text: 'text-orange-500', light: 'text-orange-200' },
@@ -182,7 +189,7 @@ export default function StudentView({
           <div className="overflow-hidden pl-1 leading-none">
             <span
               className={`font-black uppercase block leading-none select-none pointer-events-none ${roleAccent.light}`}
-              style={{ fontSize: 'clamp(100px, 35vw, 160px)' }}
+              style={{ fontSize: bgFontSize }}
             >
               {mobileTab === 'events' ? 'EVENTS' : watermarkInfo.text}
             </span>
@@ -280,7 +287,7 @@ export default function StudentView({
                     </button>
                   </div>
                 </div>
-                <div className="mx-3 mb-3 rounded-2xl overflow-hidden" style={{ height: '420px' }}>
+                <div className="mx-3 mb-3 rounded-2xl overflow-hidden flex flex-col" style={{ height: '420px' }}>
                   <CalendarGrid
                     reservations={filteredReservations}
                     weekOffset={0}
@@ -383,7 +390,7 @@ export default function StudentView({
             onClose={() => { setShowReservationInfo(false); setSelectedReservation(null); }} />
         )}
         {showProfile && (
-          <ProfileModal user={user} onClose={() => setShowProfile(false)} onUpdate={onUpdateUser} />
+          <ProfileModal user={user} onClose={() => setShowProfile(false)} onUpdate={onUpdateUser} onLogout={onLogout} />
         )}
       </div>
     );

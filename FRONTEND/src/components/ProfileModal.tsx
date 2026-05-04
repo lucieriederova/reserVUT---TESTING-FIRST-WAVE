@@ -6,9 +6,10 @@ interface ProfileModalProps {
   user: User;
   onClose: () => void;
   onUpdate: (updates: Partial<User>) => void;
+  onLogout?: () => void;
 }
 
-export default function ProfileModal({ user, onClose, onUpdate }: ProfileModalProps) {
+export default function ProfileModal({ user, onClose, onUpdate, onLogout }: ProfileModalProps) {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const avatarIndex = user.avatarIndex ?? 0;
 
@@ -76,6 +77,20 @@ export default function ProfileModal({ user, onClose, onUpdate }: ProfileModalPr
           >
             Show all avatars →
           </button>
+
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="mt-5 w-full flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wide text-red-500 hover:text-red-600 py-2.5 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Log out
+            </button>
+          )}
         </div>
       </div>
 
