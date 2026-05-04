@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabase';
-import { syncLogin, getReservations, createReservation, cancelReservation, getAllUsers, updateUserRole, verifyUser } from './lib/api';
+import { syncLogin, getReservations, createReservation, cancelReservation, getAllUsers, updateUserRole, verifyUser, getRooms, createRoom } from './lib/api';
 import { MOCK_RESERVATIONS, MOCK_USERS } from './lib/mockData';
-import { User, Reservation, UserRole, ReservationType, PRIORITY_MAP } from './components/types';
+import { User, Reservation, Room, UserRole, ReservationType, PRIORITY_MAP } from './components/types';
 import LoginView from './components/LoginView';
 import SignUpView from './components/SignUpView';
 import StudentView from './components/StudentView';
@@ -16,6 +16,7 @@ export default function App() {
   const [screen, setScreen] = useState<AppScreen>('login');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loginError, setLoginError] = useState('');
   const [signUpSuccessEmail, setSignUpSuccessEmail] = useState('');
@@ -59,6 +60,7 @@ export default function App() {
         setCurrentUser(user);
         setScreen('app');
         fetchReservations(cancelledIds.current);
+        fetchRooms();
         if (user.role === 'HEAD_ADMIN') fetchAllUsers();
       } catch {
         localStorage.removeItem(USER_STORAGE_KEY);
@@ -66,6 +68,14 @@ export default function App() {
     }
     setLoading(false);
   }, []);
+
+  const fetchRooms = async () => {
+    if (USE_MOCK_API) return;
+    try {
+      const data = await getRooms();
+      setRooms(Array.isArray(data) ? data : []);
+    } catch { /* backend offline */ }
+  };
 
   const fetchReservations = async (cancelledIds?: Set<string>) => {
     if (USE_MOCK_API) {
@@ -165,6 +175,7 @@ export default function App() {
     setCurrentUser(backendUser);
     setScreen('app');
     fetchReservations();
+    fetchRooms();
     if (role === 'HEAD_ADMIN') fetchAllUsers();
   };
 
@@ -307,6 +318,13 @@ export default function App() {
     setAllUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isVerified: true } : u)));
   };
 
+  const handleAddRoom = async (room: Omit<Room, 'id'>) => {
+    if (!USE_MOCK_API) {
+      await createRoom({ name: room.name, capacity: room.capacity, allowedRoles: room.allowedRoles });
+    }
+    await fetchRooms();
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-gray-100 flex items-center justify-center"><p className="text-gray-500 text-sm">Loading...</p></div>;
   }
@@ -324,7 +342,7 @@ export default function App() {
       <HeadAdminView
         user={currentUser}
         reservations={reservations}
-        rooms={[]}
+        rooms={rooms}
         allUsers={allUsers}
         onLogout={handleLogout}
         onCreateReservation={handleCreateReservation}
@@ -332,7 +350,7 @@ export default function App() {
         onUpdateUser={handleUpdateUser}
         onChangeUserRole={handleChangeUserRole}
         onVerifyUser={handleVerifyUser}
-        onAddRoom={async () => {}}
+        onAddRoom={handleAddRoom}
       />
     );
   }
@@ -341,6 +359,7 @@ export default function App() {
     <StudentView
       user={currentUser}
       reservations={reservations}
+      rooms={rooms}
       onLogout={handleLogout}
       onCreateReservation={handleCreateReservation}
       onCancelReservation={handleCancelReservation}

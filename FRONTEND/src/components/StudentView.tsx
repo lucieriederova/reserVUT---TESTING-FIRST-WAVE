@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import esbdLogo from '../assets/esbdlogo.png';
-import { User, Reservation, ALL_ROOMS, ReservationType } from './types';
+import { User, Reservation, Room, ALL_ROOMS, ReservationType } from './types';
 import BookingModal from './BookingModal';
 import MyReservationModal from './MyReservationModal';
 import ReservationModal from './ReservationModal';
@@ -11,6 +11,7 @@ import WeekNavigator from './WeekNavigator';
 interface StudentViewProps {
   user: User;
   reservations: Reservation[];
+  rooms?: Room[];
   onLogout: () => void;
   onCreateReservation: (data: {
     roomName: string;
@@ -34,8 +35,11 @@ const TYPE_FILTER_OPTIONS: Array<{ value: ReservationType | 'ALL'; label: string
 ];
 
 export default function StudentView({
-  user, reservations, onLogout, onCreateReservation, onCancelReservation, onUpdateUser,
+  user, reservations, rooms: roomsProp, onLogout, onCreateReservation, onCancelReservation, onUpdateUser,
 }: StudentViewProps) {
+  const dynamicRooms = roomsProp && roomsProp.length > 0
+    ? roomsProp.filter(r => r.allowedRoles.includes(user.role)).map(r => r.name)
+    : undefined;
   const [selectedRoom, setSelectedRoom] = useState('');
   const [roomDropdownOpen, setRoomDropdownOpen] = useState(false);
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
@@ -411,7 +415,7 @@ export default function StudentView({
       </div>
 
       {showBooking && (
-        <BookingModal user={user} onClose={() => setShowBooking(false)}
+        <BookingModal user={user} rooms={dynamicRooms} onClose={() => setShowBooking(false)}
           onConfirm={async (data) => { await onCreateReservation(data); setShowBooking(false); }} />
       )}
       {showMyReservation && selectedReservation && (

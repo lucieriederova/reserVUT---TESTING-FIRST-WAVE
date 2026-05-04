@@ -362,7 +362,11 @@ export default function HeadAdminView({
           {/* ROOMS */}
           {activeSection === 'ROOMS' && (
             <div className="flex flex-col gap-4">
-              <h2 className={`text-xl font-black uppercase tracking-tighter ${headingText}`}>Room Management</h2>
+              <div className="flex items-center justify-between">
+                <h2 className={`text-xl font-black uppercase tracking-tighter ${headingText}`}>Room Management</h2>
+                <button onClick={() => { setShowAddRoom(true); setNewRoomName(''); setNewRoomCapacity(10); setNewRoomRoles(['STUDENT']); }}
+                  className="text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">+ ADD ROOM</button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(rooms.length > 0 ? rooms : ROOM_LIST.map((name, i) => ({ id: String(i), name, capacity: 10, allowedRoles: ['STUDENT', 'GUIDE', 'CEO'] as UserRole[] }))).map(room => (
                   <div key={room.name} className={`${cardBg} border rounded-2xl p-4 shadow-sm`}>
@@ -399,6 +403,52 @@ export default function HeadAdminView({
                       <button onClick={handleSaveRoomRoles} disabled={savingRoom}
                         className="flex-1 py-2 rounded-lg text-sm font-bold bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white">
                         {savingRoom ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Add Room modal */}
+              {showAddRoom && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                  <div className={`${dark ? 'bg-[#1a1f2e]' : 'bg-white'} rounded-2xl shadow-2xl w-full max-w-sm p-6`}>
+                    <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 ${headingText}`}>New Room</h3>
+                    <div className="mb-3">
+                      <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1 ${subText}`}>Room Name</label>
+                      <input value={newRoomName} onChange={e => setNewRoomName(e.target.value)}
+                        placeholder="e.g. Aquarium"
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 ${inputClass}`} />
+                    </div>
+                    <div className="mb-4">
+                      <label className={`block text-[10px] font-bold uppercase tracking-widest mb-1 ${subText}`}>Capacity</label>
+                      <input type="number" min={1} value={newRoomCapacity} onChange={e => setNewRoomCapacity(Number(e.target.value))}
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 ${inputClass}`} />
+                    </div>
+                    <p className={`text-[10px] uppercase tracking-wider mb-2 ${subText}`}>Who can book this room</p>
+                    <div className="flex flex-col gap-2 mb-5">
+                      {(['STUDENT','CEO','GUIDE','HEAD_ADMIN'] as UserRole[]).map(r => (
+                        <label key={r} className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={newRoomRoles.includes(r)}
+                            onChange={e => setNewRoomRoles(prev => e.target.checked ? [...prev, r] : prev.filter(x => x !== r))}
+                            className="accent-purple-600" />
+                          <span className={`text-sm ${headingText}`}>{r === 'CEO' ? 'Leader' : r.charAt(0) + r.slice(1).toLowerCase().replace('_', ' ')}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => setShowAddRoom(false)} className={`flex-1 py-2 rounded-lg text-sm font-bold ${dark ? 'bg-[#1e2438] text-gray-400' : 'bg-gray-100 text-gray-700'}`}>Cancel</button>
+                      <button
+                        disabled={!newRoomName.trim() || newRoomRoles.length === 0 || savingRoom}
+                        onClick={async () => {
+                          setSavingRoom(true);
+                          try {
+                            await onAddRoom({ name: newRoomName.trim(), displayName: newRoomName.trim(), capacity: newRoomCapacity, allowedRoles: newRoomRoles });
+                            setShowAddRoom(false);
+                          } catch { /* ignore */ } finally { setSavingRoom(false); }
+                        }}
+                        className="flex-1 py-2 rounded-lg text-sm font-bold bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white">
+                        {savingRoom ? 'Saving...' : 'Create'}
                       </button>
                     </div>
                   </div>

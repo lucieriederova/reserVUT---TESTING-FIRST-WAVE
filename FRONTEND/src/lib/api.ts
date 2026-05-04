@@ -68,3 +68,8 @@ export async function updateRoom(roomName: string, data: { allowedRoles: UserRol
   const res = await api.patch(`/rooms/${encodeURIComponent(roomName)}`, data);
   return res.data;
 }
+
+export async function createRoom(data: { name: string; capacity: number; allowedRoles: UserRole[] }) {
+  const res = await api.post('/rooms', data);
+  return res.data;
+}
