@@ -222,6 +222,8 @@ export default function BookingModal({ user, rooms: roomsProp, onClose, onConfir
                 ? '⚠️ Cannot book a time in the past.'
                 : error.includes('verified') || error.includes('NOT_VERIFIED')
                 ? '⚠️ Your account needs Head Admin verification before booking.'
+                : error === 'Network Error'
+                ? '⚠️ Server unreachable — please try again later.'
                 : `⚠️ ${error}`}
             </p>
           </div>

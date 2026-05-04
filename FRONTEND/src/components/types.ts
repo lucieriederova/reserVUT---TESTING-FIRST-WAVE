@@ -60,7 +60,7 @@ export const PRIORITY_MAP: Record<UserRole, number> = {
 };
  
 export const TYPES_BY_ROLE: Record<UserRole, ReservationType[]> = {
-  STUDENT:    ['MEETING', 'OTHER'],
+  STUDENT:    ['MEETING', 'SESSION', 'WORKSHOP', 'PITCHDECK', 'EVENT', 'OTHER'],
   CEO:        ['MEETING', 'WORKSHOP', 'PITCHDECK', 'OTHER'],
   GUIDE:      ['SESSION', 'MEETING', 'OTHER'],
   HEAD_ADMIN: ['SESSION', 'MEETING', 'WORKSHOP', 'PITCHDECK', 'GLOBAL_EVENT', 'EVENT', 'OTHER'],

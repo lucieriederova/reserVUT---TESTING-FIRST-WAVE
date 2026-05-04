@@ -347,8 +347,8 @@ export default function StudentView({
             </div>
           </div>
 
-          {/* MOBILE BOTTOM BAR — hidden (logout moved to navbar) */}
-          <div className={`hidden sm:flex px-4 pb-3 items-center gap-2`}>
+          {/* MOBILE BOTTOM BAR — hidden on mobile (logout in navbar) and on lg+ (logout in sidebar) */}
+          <div className={`hidden sm:flex lg:hidden px-4 pb-3 items-center gap-2`}>
             <div className={`${cardBg} border rounded-xl px-3 py-2 flex-1 flex items-center gap-2`}>
               <span className={`w-2 h-2 rounded-full flex-shrink-0 ${upcomingReservations.length > 0 ? 'bg-green-500' : 'bg-gray-400'}`} />
               <span className={`text-xs ${subText}`}>
