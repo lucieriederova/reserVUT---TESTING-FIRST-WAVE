@@ -117,12 +117,12 @@ export default function CalendarGrid({
   }, [isSingleDay, startHour, rowH]);
 
   const cellBg   = dark ? 'bg-[#1f2535]' : 'bg-white';
-  const borderC  = dark ? 'border-gray-700/40' : 'border-gray-200';
-  const borderH  = dark ? 'border-gray-700/20' : 'border-gray-100';
-  const timeText = dark ? 'text-gray-600' : 'text-gray-400';
-  const dayText  = dark ? 'text-gray-500' : 'text-gray-400';
-  const dateText = dark ? 'text-gray-300' : 'text-gray-700';
-  const legendBg = dark ? 'bg-[#1a1f2e] border-gray-700/40 text-gray-500' : 'bg-gray-50 border-gray-100 text-gray-400';
+  const borderC  = dark ? 'border-gray-700/60' : 'border-gray-200';
+  const borderH  = dark ? 'border-gray-700/30' : 'border-gray-100';
+  const timeText = dark ? 'text-gray-400' : 'text-gray-500';
+  const dayText  = dark ? 'text-gray-400' : 'text-gray-500';
+  const dateText = dark ? 'text-gray-200' : 'text-gray-700';
+  const legendBg = dark ? 'bg-[#1a1f2e] border-gray-700/40 text-gray-400' : 'bg-gray-50 border-gray-200 text-gray-500';
 
   const getReservationsForDay = (day: Date) =>
     reservations.filter(r => sameLocalDate(new Date(r.startTime), day) && r.status === 'active');
@@ -174,7 +174,7 @@ export default function CalendarGrid({
                   className="absolute w-full flex items-start justify-end pr-2"
                   style={{ top: (hour - startHour) * rowH - 8, height: rowH }}
                 >
-                  <span className={`text-[10px] font-medium tabular-nums ${timeText}`}>
+                  <span className={`text-[11px] font-semibold tabular-nums ${timeText}`}>
                     {String(hour).padStart(2, '0')}:00
                   </span>
                 </div>
