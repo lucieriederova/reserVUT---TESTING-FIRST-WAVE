@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import * as mem from '../services/memoryStore.js';
 import { validateReservation } from '../services/memoryStore.js';
-import { getEffectivePriority } from '../services/priorityEngine.js';
+import { ROLE_PRIORITY } from '../services/priorityEngine.js';
 import { canRoleBookRoom } from '../services/roomPolicyStore.js';
 import {
   sendReservationConfirmation,
@@ -111,7 +111,9 @@ export async function createReservation(req: Request, res: Response): Promise<vo
     return;
   }
  
-  const priority = (body.priorityLevel as number) ?? getEffectivePriority(userRole, type);
+  // Store base role priority (1-4) so frontend can color-code by role.
+  // Role hierarchy is absolute — type bonuses don't let a lower role beat a higher one.
+  const rolePriority = ROLE_PRIORITY[userRole];
  
   if (db) {
     try {
@@ -156,7 +158,7 @@ export async function createReservation(req: Request, res: Response): Promise<vo
       // GLOBAL_EVENT: informational only, skip room conflict check
       if (type === 'GLOBAL_EVENT') {
         const reservation = await db.reservation.create({
-          data: { roomName: roomName || 'Event', startTime: start, endTime: end, description, type: type as any, priorityLevel: priority, status: 'ACTIVE', userId },
+          data: { roomName: roomName || 'Event', startTime: start, endTime: end, description, type: type as any, priorityLevel: rolePriority, status: 'ACTIVE', userId },
         });
         res.status(201).json({ reservation, preempted: [] });
         return;
@@ -167,7 +169,7 @@ export async function createReservation(req: Request, res: Response): Promise<vo
       });
       if (overlapping.length > 0) {
         const maxPriority = Math.max(...overlapping.map((r: any) => r.priorityLevel as number));
-        if (priority <= maxPriority) {
+        if (rolePriority <= maxPriority) {
           res.status(409).json({ error: 'Conflict', code: 'CONFLICT', conflicting: overlapping });
           return;
         }
@@ -183,7 +185,7 @@ export async function createReservation(req: Request, res: Response): Promise<vo
           endTime: end,
           description,
           type: type as any,
-          priorityLevel: priority,
+          priorityLevel: rolePriority,
           status: 'ACTIVE',
           userId,
         },
@@ -236,7 +238,7 @@ export async function createReservation(req: Request, res: Response): Promise<vo
   try {
     const memUser = mem.findUserById(userId);
     const result = mem.createReservation({
-      roomName, startTime, endTime, description, type, priorityLevel: priority, userId,
+      roomName, startTime, endTime, description, type, priorityLevel: rolePriority, userId,
       userName: memUser ? `${memUser.firstName ?? ''} ${memUser.lastName ?? ''}`.trim() || memUser.email : undefined,
     });
     res.status(201).json(result);
