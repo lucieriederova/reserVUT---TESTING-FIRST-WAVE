@@ -1,40 +1,24 @@
 import { useState } from 'react';
-import { GraduationCap, Briefcase, Compass, ShieldCheck } from 'lucide-react';
 import esbdLogo from '../assets/esbdlogo.png';
-import { UserRole } from './types';
 
 interface LoginViewProps {
-  onLogin: (email: string, password: string, role: UserRole) => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<void>;
   onShowSignUp: () => void;
   error?: string;
   signUpSuccessEmail?: string;
 }
 
-const ROLE_OPTIONS = [
-  { role: 'STUDENT' as UserRole, label: 'STUDENT', icon: GraduationCap },
-  { role: 'CEO' as UserRole, label: 'LEADER', icon: Briefcase },
-  { role: 'GUIDE' as UserRole, label: 'GUIDE', icon: Compass },
-  { role: 'HEAD_ADMIN' as UserRole, label: 'HEAD ADMIN', icon: ShieldCheck },
-];
-
 export default function LoginView({ onLogin, onShowSignUp, error, signUpSuccessEmail }: LoginViewProps) {
-  const [selectedRole, setSelectedRole] = useState<UserRole>('STUDENT');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleRoleSelect = (role: UserRole) => {
-    setSelectedRole(role);
-    setEmail('');
-    setPassword('');
-  };
-
   const handleSignIn = async () => {
     if (!email || !password) return;
     setLoading(true);
     try {
-      await onLogin(email, password, selectedRole);
+      await onLogin(email, password);
     } finally {
       setLoading(false);
     }
@@ -63,34 +47,12 @@ export default function LoginView({ onLogin, onShowSignUp, error, signUpSuccessE
       </div>
 
       <div className="flex-1 flex items-center justify-center p-4 pt-16 sm:pt-4">
-        <div className="bg-white rounded-2xl shadow-lg w-full max-w-xl p-6 sm:p-10">
+        <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 sm:p-10">
           <div className="flex justify-center mb-2">
             <img src={esbdLogo} alt="ESBD" className="h-28 object-contain" />
           </div>
 
-          <h1 className="text-center text-xl font-extrabold text-gray-800 mb-6 tracking-tight">WELCOME</h1>
-
-          {/* Role selector — 2 × 2 on mobile, 4 in a row on sm+ */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6 sm:mb-8">
-            {ROLE_OPTIONS.map(({ role, label, icon: Icon }) => (
-              <button
-                key={role}
-                onClick={() => handleRoleSelect(role)}
-                className={`flex flex-col items-center justify-center gap-1.5 sm:gap-2 py-3 sm:py-4 rounded-xl transition-all border-2 ${
-                  selectedRole === role
-                    ? 'bg-purple-50 border-purple-500 text-purple-700 shadow-sm'
-                    : 'bg-gray-50 border-transparent text-gray-400 hover:bg-gray-100'
-                }`}
-              >
-                <Icon size={26} strokeWidth={selectedRole === role ? 2 : 1.5} />
-                <span className={`text-[9px] sm:text-[10px] font-bold tracking-tight text-center leading-tight uppercase ${
-                  selectedRole === role ? 'text-purple-700' : 'text-gray-500'
-                }`}>
-                  {label}
-                </span>
-              </button>
-            ))}
-          </div>
+          <h1 className="text-center text-xl font-extrabold text-gray-800 mb-8 tracking-tight">WELCOME</h1>
 
           <div className="mb-4">
             <label className="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">E-MAIL</label>

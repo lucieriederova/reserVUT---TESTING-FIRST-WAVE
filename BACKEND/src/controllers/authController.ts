@@ -45,35 +45,28 @@ function mapRole(raw: string, email: string): Role | null {
 export async function loginUser(req: Request, res: Response): Promise<void> {
   const supabaseUserId = (req.body.supabaseUserId || req.body.id) as string;
   const email = req.body.email as string;
-  const rawRole = req.body.role as string;
   const firstName = req.body.firstName as string | undefined;
   const lastName = req.body.lastName as string | undefined;
- 
-  if (!supabaseUserId || !email || !rawRole) {
-    res.status(400).json({ error: 'supabaseUserId, email and role are required' });
+
+  if (!supabaseUserId || !email) {
+    res.status(400).json({ error: 'supabaseUserId and email are required' });
     return;
   }
- 
-  const role = mapRole(rawRole, email);
-  if (!role) {
-    res.status(400).json({ error: `Invalid role: ${rawRole}` });
-    return;
-  }
- 
+
+  // Role is assigned once at creation — HEAD_ADMIN email is always HEAD_ADMIN, everyone else starts as STUDENT
+  const defaultRole: Role = email === HEAD_ADMIN_EMAIL ? 'HEAD_ADMIN' : 'STUDENT';
+
   const db = await getDb();
- 
+
   if (db) {
     try {
       const existing = await db.user.findUnique({ where: { supabaseId: supabaseUserId } });
       if (existing) {
-        // Only force-set isVerified for STUDENT/HEAD_ADMIN; don't reset verified CEO/GUIDE
-        const verifiedUpdate = AUTO_VERIFIED.includes(role) ? { isVerified: true } : {};
+        // Preserve stored role — only HEAD_ADMIN can change roles via the admin panel
         const updated = await db.user.update({
           where: { supabaseId: supabaseUserId },
           data: {
-            role: role as any,
             email,
-            ...verifiedUpdate,
             ...(firstName && { firstName }),
             ...(lastName && { lastName }),
           },
@@ -87,12 +80,11 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
             firstName: firstName ?? '',
             lastName: lastName ?? '',
             vutId: `vut-${Date.now()}`,
-            role: role as any,
-            isVerified: AUTO_VERIFIED.includes(role),
+            role: defaultRole as any,
+            isVerified: AUTO_VERIFIED.includes(defaultRole),
           },
         });
         res.status(201).json({ user: created, created: true });
-        // Send welcome email asynchronously — don't block response
         sendWelcomeEmail(email, firstName ?? email.split('@')[0]).catch(console.error);
       }
       return;
@@ -103,6 +95,9 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
 
   console.warn('⚠️  [loginUser] USING IN-MEMORY STORE — DB not connected or failed');
   const isNew = !mem.findUserBySupabaseId(supabaseUserId);
+  // For existing in-memory users, preserve their role
+  const existingMem = mem.findUserBySupabaseId(supabaseUserId);
+  const role = existingMem ? existingMem.role : defaultRole;
   const user = mem.upsertUser({ supabaseId: supabaseUserId, email, role, firstName, lastName });
   if (isNew) {
     sendWelcomeEmail(email, firstName ?? email.split('@')[0]).catch(console.error);

@@ -114,16 +114,17 @@ export default function App() {
     } catch { /* ignore */ }
   };
 
-  const handleLogin = async (email: string, password: string, role: UserRole) => {
+  const handleLogin = async (email: string, password: string) => {
     setLoginError('');
     setSignUpSuccessEmail('');
     if (USE_MOCK_API) {
-      const mockUser = getMockUser(email, role);
+      const mockRole: UserRole = email === '269387@vutbr.cz' ? 'HEAD_ADMIN' : 'STUDENT';
+      const mockUser = getMockUser(email, mockRole);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(mockUser));
       setCurrentUser(mockUser);
       setScreen('app');
       setReservations(MOCK_RESERVATIONS);
-      syncMockUsersList(role);
+      syncMockUsersList(mockRole);
       return;
     }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -143,30 +144,33 @@ export default function App() {
     try {
       const res = await syncLogin(
         { id: data.user.id, email: data.user.email! },
-        role,
+        'STUDENT', // backend ignores this for existing users; new users always start as STUDENT
         {
           firstName: data.user.user_metadata?.first_name,
           lastName: data.user.user_metadata?.last_name,
         }
       );
+      const returnedRole: UserRole = res.user?.role ?? 'STUDENT';
       backendUser = {
         id: res.user?.id ?? data.user.id,
         email: data.user.email!,
         firstName: res.user?.firstName ?? data.user.user_metadata?.first_name ?? '',
         lastName: res.user?.lastName ?? data.user.user_metadata?.last_name ?? '',
-        role: res.user?.role ?? role,
-        isVerified: res.user?.isVerified ?? ['STUDENT', 'HEAD_ADMIN'].includes(role),
+        role: returnedRole,
+        isVerified: res.user?.isVerified ?? false,
         avatarIndex: 0,
         vutId: res.user?.vutId,
       };
     } catch {
+      // Backend offline — derive role from email only
+      const fallbackRole: UserRole = email === '269387@vutbr.cz' ? 'HEAD_ADMIN' : 'STUDENT';
       backendUser = {
         id: data.user.id,
         email: data.user.email!,
         firstName: data.user.user_metadata?.first_name ?? '',
         lastName: data.user.user_metadata?.last_name ?? '',
-        role,
-        isVerified: ['STUDENT', 'HEAD_ADMIN'].includes(role),
+        role: fallbackRole,
+        isVerified: fallbackRole === 'STUDENT' || fallbackRole === 'HEAD_ADMIN',
         avatarIndex: 0,
       };
     }
@@ -176,7 +180,7 @@ export default function App() {
     setScreen('app');
     fetchReservations();
     fetchRooms();
-    if (role === 'HEAD_ADMIN') fetchAllUsers();
+    if (backendUser.role === 'HEAD_ADMIN') fetchAllUsers();
   };
 
   const handleSignUp = async (formData: { firstName: string; lastName: string; email: string; password: string }) => {
@@ -341,7 +345,7 @@ export default function App() {
   }
 
   if (screen === 'login' || !currentUser) {
-    return <LoginView onLogin={handleLogin} onShowSignUp={() => setScreen('signup')} error={loginError} signUpSuccessEmail={signUpSuccessEmail} />;
+    return <LoginView onLogin={(e, p) => handleLogin(e, p)} onShowSignUp={() => setScreen('signup')} error={loginError} signUpSuccessEmail={signUpSuccessEmail} />;
   }
 
   if (currentUser.role === 'HEAD_ADMIN') {
