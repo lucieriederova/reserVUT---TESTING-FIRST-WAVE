@@ -17,31 +17,26 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5001;
  * DYNAMIC CORS CONFIGURATION
  * Řeší problémy s "No 'Access-Control-Allow-Origin'" pro Vercel preview linky.
  */
-const allowedOrigins = [
-  'https://reser-vut-testing-first-wave.vercel.app', // Hlavní produkční doména
-  'http://localhost:3000',                          // React (standard)
-  'http://localhost:5173',                          // Vite (standard)
+const allowedOrigins: (string | RegExp)[] = [
+  'https://reser-vut-testing-first-wave.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  /\.vercel\.app$/,
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Povolí požadavky bez origin (Postman, mobilní appky)
-    if (!origin) return callback(null, true);
-
-    // Kontrola, zda je origin v seznamu nebo zda jde o Vercel subdoménu (regex)
-    const isAllowed = allowedOrigins.includes(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin);
-
-    if (isAllowed) {
+    if (!origin || allowedOrigins.some(domain =>
+      typeof domain === 'string' ? domain === origin : domain.test(origin)
+    )) {
       callback(null, true);
     } else {
-      console.warn(`CORS Blocked: Request from unauthorized origin: ${origin}`);
-      callback(new Error('Not allowed by CORS - VUTFP Security Policy'));
+      callback(new Error('Not allowed by CORS - VUTFP Policy'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 204
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 /**
@@ -92,9 +87,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`
   --------------------------------------------------
   🚀 reserVUT backend running on port: ${PORT}
-  🔗 API URL: http://localhost:${PORT}/api
+  🔗 API URL: http://0.0.0.0:${PORT}/api
   🛡️  CORS: Enabled for Vercel & Localhost
-  📂 DB Status: ${process.env.DATABASE_URL ? '✅ Connected (PostgreSQL)' : '⚠️  Using In-Memory Store'}
+  📂 DB Status: ${process.env.DATABASE_URL ? '✅ Connected' : '⚠️  In-Memory'}
   --------------------------------------------------
   `);
 });

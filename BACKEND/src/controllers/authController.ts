@@ -43,7 +43,7 @@ function mapRole(raw: string, email: string): Role | null {
 }
  
 export async function loginUser(req: Request, res: Response): Promise<void> {
-  const supabaseUserId = req.body.supabaseUserId as string;
+  const supabaseUserId = (req.body.supabaseUserId || req.body.id) as string;
   const email = req.body.email as string;
   const rawRole = req.body.role as string;
   const firstName = req.body.firstName as string | undefined;
@@ -97,10 +97,11 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
       }
       return;
     } catch (e) {
-      console.error('DB auth error, falling back:', e);
+      console.error('🔴 DB auth error, falling back to IN-MEMORY STORE:', e);
     }
   }
- 
+
+  console.warn('⚠️  [loginUser] USING IN-MEMORY STORE — DB not connected or failed');
   const isNew = !mem.findUserBySupabaseId(supabaseUserId);
   const user = mem.upsertUser({ supabaseId: supabaseUserId, email, role, firstName, lastName });
   if (isNew) {
@@ -118,6 +119,7 @@ export async function getUsers(_req: Request, res: Response): Promise<void> {
       return;
     } catch {}
   }
+  console.warn('⚠️  [getUsers] USING IN-MEMORY STORE — DB not connected or failed');
   res.json({ users: mem.getAllUsers() });
 }
  
@@ -140,6 +142,7 @@ export async function updateUserRole(req: Request, res: Response): Promise<void>
       return;
     } catch {}
   }
+  console.warn('⚠️  [updateUserRole] USING IN-MEMORY STORE — DB not connected or failed');
   const user = mem.updateUserRole(id, role);
   if (!user) { res.status(404).json({ error: 'User not found' }); return; }
   res.json({ user });
@@ -155,6 +158,7 @@ export async function verifyUser(req: Request, res: Response): Promise<void> {
       return;
     } catch {}
   }
+  console.warn('⚠️  [verifyUser] USING IN-MEMORY STORE — DB not connected or failed');
   const user = mem.verifyUser(id);
   if (!user) { res.status(404).json({ error: 'User not found' }); return; }
   res.json({ user });
