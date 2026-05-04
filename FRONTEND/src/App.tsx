@@ -114,17 +114,16 @@ export default function App() {
     } catch { /* ignore */ }
   };
 
-  const handleLogin = async (email: string, password: string) => {
+  const handleLogin = async (email: string, password: string, selectedRole: UserRole) => {
     setLoginError('');
     setSignUpSuccessEmail('');
     if (USE_MOCK_API) {
-      const mockRole: UserRole = email === '269387@vutbr.cz' ? 'HEAD_ADMIN' : 'STUDENT';
-      const mockUser = getMockUser(email, mockRole);
+      const mockUser = getMockUser(email, selectedRole);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(mockUser));
       setCurrentUser(mockUser);
       setScreen('app');
       setReservations(MOCK_RESERVATIONS);
-      syncMockUsersList(mockRole);
+      syncMockUsersList(selectedRole);
       return;
     }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -144,25 +143,30 @@ export default function App() {
     try {
       const res = await syncLogin(
         { id: data.user.id, email: data.user.email! },
-        'STUDENT', // backend ignores this for existing users; new users always start as STUDENT
+        selectedRole,
         {
           firstName: data.user.user_metadata?.first_name,
           lastName: data.user.user_metadata?.last_name,
         }
       );
-      const returnedRole: UserRole = res.user?.role ?? 'STUDENT';
+      const actualRole: UserRole = res.user?.role ?? 'STUDENT';
+      // Validate: user can only log in as their actual role (or lower)
+      if (PRIORITY_MAP[selectedRole] > PRIORITY_MAP[actualRole]) {
+        const roleLabel: Record<UserRole, string> = { STUDENT: 'Student', CEO: 'Leader', GUIDE: 'Guide', HEAD_ADMIN: 'Head Admin' };
+        setLoginError(`You don't have access to the ${roleLabel[selectedRole]} role. Your role is ${roleLabel[actualRole]}.`);
+        return;
+      }
       backendUser = {
         id: res.user?.id ?? data.user.id,
         email: data.user.email!,
         firstName: res.user?.firstName ?? data.user.user_metadata?.first_name ?? '',
         lastName: res.user?.lastName ?? data.user.user_metadata?.last_name ?? '',
-        role: returnedRole,
+        role: selectedRole, // use selected (≤ actual) for the view
         isVerified: res.user?.isVerified ?? false,
         avatarIndex: 0,
         vutId: res.user?.vutId,
       };
     } catch {
-      // Backend offline — derive role from email only
       const fallbackRole: UserRole = email === '269387@vutbr.cz' ? 'HEAD_ADMIN' : 'STUDENT';
       backendUser = {
         id: data.user.id,
@@ -345,7 +349,7 @@ export default function App() {
   }
 
   if (screen === 'login' || !currentUser) {
-    return <LoginView onLogin={(e, p) => handleLogin(e, p)} onShowSignUp={() => setScreen('signup')} error={loginError} signUpSuccessEmail={signUpSuccessEmail} />;
+    return <LoginView onLogin={handleLogin} onShowSignUp={() => setScreen('signup')} error={loginError} signUpSuccessEmail={signUpSuccessEmail} />;
   }
 
   if (currentUser.role === 'HEAD_ADMIN') {
