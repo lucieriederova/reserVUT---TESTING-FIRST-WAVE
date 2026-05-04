@@ -7,21 +7,9 @@ import roomPolicyRoutes from './routes/roomPolicyRoutes.js';
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5001;
 
-const ALLOWED_ORIGINS = [
-  'https://reser-vut-testing-first-wave.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:3000',
-];
-
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.vercel.app')) {
-      return callback(null, true);
-    }
-    callback(new Error(`CORS: origin ${origin} not allowed`));
-  },
-  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  origin: 'https://reser-vut-testing-first-wave.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
