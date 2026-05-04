@@ -205,7 +205,12 @@ export default function HeadAdminView({
         <div className={`${sidebarBg} flex flex-col transition-all duration-200 ${sidebarCollapsed ? 'w-12' : 'w-52'}`}>
           {!sidebarCollapsed && (
             <div className="p-4 border-b border-[#252d42] flex items-center justify-between">
-              <span className="bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-full">RESERVUT</span>
+              <div className="flex flex-col items-center">
+                <span className="bg-[#9333ea] text-white text-[10px] px-3 py-1 rounded-2xl shadow-sm tracking-tight">
+                  reser<span className="font-extrabold">VUT</span>
+                </span>
+                <span className="text-[#9333ea] text-[8px] font-bold tracking-widest mt-0.5">BY LSSL</span>
+              </div>
             </div>
           )}
           <nav className="flex-1 py-4">
