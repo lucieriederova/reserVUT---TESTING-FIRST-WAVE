@@ -138,7 +138,7 @@ export async function createReservation(req: Request, res: Response): Promise<vo
       }
  
       // Simultaneous rooms check (STUDENT: max 1, CEO: max 2)
-      const maxSimultaneous: Record<Role, number> = { STUDENT: 1, CEO: 3, GUIDE: Infinity, HEAD_ADMIN: Infinity };
+      const maxSimultaneous: Record<Role, number> = { STUDENT: 1, CEO: 2, GUIDE: Infinity, HEAD_ADMIN: Infinity };
       const maxSimult = maxSimultaneous[userRole];
       if (maxSimult !== Infinity) {
         const simultCount = await db.reservation.count({
@@ -153,8 +153,17 @@ export async function createReservation(req: Request, res: Response): Promise<vo
         }
       }
  
+      // GLOBAL_EVENT: informational only, skip room conflict check
+      if (type === 'GLOBAL_EVENT') {
+        const reservation = await db.reservation.create({
+          data: { roomName: roomName || 'Event', startTime: start, endTime: end, description, type: type as any, priorityLevel: priority, status: 'ACTIVE', userId },
+        });
+        res.status(201).json({ reservation, preempted: [] });
+        return;
+      }
+
       const overlapping = await db.reservation.findMany({
-        where: { roomName, status: 'ACTIVE', startTime: { lt: end }, endTime: { gt: start } },
+        where: { roomName, status: 'ACTIVE', startTime: { lt: end }, endTime: { gt: start }, type: { not: 'GLOBAL_EVENT' as any } },
       });
       if (overlapping.length > 0) {
         const maxPriority = Math.max(...overlapping.map((r: any) => r.priorityLevel as number));
@@ -269,7 +278,10 @@ export async function deleteReservation(req: Request, res: Response): Promise<vo
     try {
       const r = await db.reservation.findUnique({ where: { id: reservationId } });
       if (!r) { res.status(404).json({ error: 'Not found' }); return; }
-      if (r.userId !== userId && userRole !== 'HEAD_ADMIN') {
+      const PRIORITY: Record<Role, number> = { STUDENT: 1, CEO: 2, GUIDE: 3, HEAD_ADMIN: 4 };
+      const isOwner = r.userId === userId;
+      const canOverride = PRIORITY[userRole ?? 'STUDENT'] > ((r as any).priorityLevel ?? 0);
+      if (!isOwner && !canOverride) {
         res.status(403).json({ error: 'Forbidden' }); return;
       }
       const updated = await db.reservation.update({ where: { id: reservationId }, data: { status: 'CANCELLED' } });
