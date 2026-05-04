@@ -174,7 +174,7 @@ export default function HeadAdminView({
       {/* NAVBAR */}
       <div className={`${navBg} border-b px-4 py-2 flex items-center justify-between`}>
         <div className="flex items-center">
-          <img src={esbdLogo} alt="ESBD" className="h-10 object-contain" />
+          <img src={esbdLogo} alt="ESBD" className="h-20 object-contain" />
         </div>
         <div className="flex items-center gap-3">
           <button onClick={toggleDark} className={`transition-colors ${dark ? 'text-yellow-400' : 'text-gray-400'}`}>
