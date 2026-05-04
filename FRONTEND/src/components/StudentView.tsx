@@ -175,25 +175,29 @@ export default function StudentView({
   if (isMobile) {
     return (
       <div className="h-[100dvh] bg-white flex flex-col overflow-hidden font-sans">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2.5 bg-white">
+        {/* Header — fixed, never scrolls */}
+        <div className="flex items-center justify-between px-4 py-2 bg-white flex-shrink-0">
           <img src={esbdLogo} alt="ESBD" className="h-10 object-contain" />
-          <span className="bg-[#9333ea] text-white text-sm px-5 py-2 rounded-2xl font-medium tracking-tight">
-            reser<span className="font-extrabold">VUT</span>
+          <div className="flex flex-col items-center">
+            <span className="bg-[#9333ea] text-white text-sm px-5 py-2 rounded-2xl shadow-sm tracking-tight">
+              reser<span className="font-extrabold">VUT</span>
+            </span>
+            <span className="text-[#9333ea] text-[9px] font-bold tracking-widest mt-0.5">BY LSSL</span>
+          </div>
+        </div>
+
+        {/* Large role/section text — fixed below header, never scrolls */}
+        <div className="overflow-hidden pl-1 leading-none flex-shrink-0">
+          <span
+            className={`font-black uppercase block leading-none select-none pointer-events-none ${roleAccent.light}`}
+            style={{ fontSize: bgFontSize }}
+          >
+            {mobileTab === 'events' ? 'EVENTS' : watermarkInfo.text}
           </span>
         </div>
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto">
-          {/* Large background role/section text */}
-          <div className="overflow-hidden pl-1 leading-none">
-            <span
-              className={`font-black uppercase block leading-none select-none pointer-events-none ${roleAccent.light}`}
-              style={{ fontSize: bgFontSize }}
-            >
-              {mobileTab === 'events' ? 'EVENTS' : watermarkInfo.text}
-            </span>
-          </div>
 
           {/* HOME TAB */}
           {mobileTab === 'home' && (
