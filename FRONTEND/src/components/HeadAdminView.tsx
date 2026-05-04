@@ -206,10 +206,10 @@ export default function HeadAdminView({
           {!sidebarCollapsed && (
             <div className="p-4 border-b border-[#252d42] flex items-center justify-between">
               <div className="flex flex-col items-center">
-                <span className="bg-[#9333ea] text-white text-[10px] px-3 py-1 rounded-2xl shadow-sm tracking-tight">
+                <span className="bg-[#9333ea] text-white text-base px-6 py-2 rounded-2xl shadow-sm tracking-tight">
                   reser<span className="font-extrabold">VUT</span>
                 </span>
-                <span className="text-[#9333ea] text-[8px] font-bold tracking-widest mt-0.5">BY LSSL</span>
+                <span className="text-[#9333ea] text-[10px] font-bold tracking-widest mt-1">BY LSSL</span>
               </div>
             </div>
           )}
