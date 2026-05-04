@@ -53,6 +53,7 @@ export default function StudentView({
   const [dark, setDark] = useState(() => localStorage.getItem('reservut_dark') === 'true');
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
   const [mobileDayOffset, setMobileDayOffset] = useState(0); // days from today
+  const [mobileTab, setMobileTab] = useState<'home' | 'calendar' | 'events'>('home');
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 640);
@@ -70,6 +71,22 @@ export default function StudentView({
   const mobileDateLabel = mobileDate.toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric', month: 'numeric',
   });
+
+  const weekRangeLabel = useMemo(() => {
+    const monday = new Date(mobileDate);
+    monday.setDate(mobileDate.getDate() - ((mobileDate.getDay() + 6) % 7));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const fmt = (d: Date) => `${d.getDate()}.${d.getMonth() + 1}.`;
+    return `${fmt(monday)}-${fmt(sunday)}`;
+  }, [mobileDate]);
+
+  const roleAccent = {
+    STUDENT: { bg: 'bg-pink-500', text: 'text-pink-500', light: 'text-pink-200' },
+    CEO: { bg: 'bg-orange-500', text: 'text-orange-500', light: 'text-orange-200' },
+    GUIDE: { bg: 'bg-purple-600', text: 'text-purple-600', light: 'text-purple-200' },
+    HEAD_ADMIN: { bg: 'bg-blue-600', text: 'text-blue-600', light: 'text-blue-200' },
+  }[user.role];
 
   const toggleDark = () => {
     setDark(prev => {
@@ -147,6 +164,230 @@ export default function StudentView({
     const start = new Date(r.startTime);
     return `${start.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric' })} - ${r.roomName}`;
   };
+
+  if (isMobile) {
+    return (
+      <div className="h-[100dvh] bg-white flex flex-col overflow-hidden font-sans">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-white">
+          <img src={esbdLogo} alt="ESBD" className="h-10 object-contain" />
+          <span className="bg-[#9333ea] text-white text-sm px-5 py-2 rounded-2xl font-medium tracking-tight">
+            reser<span className="font-extrabold">VUT</span>
+          </span>
+        </div>
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Large background role/section text */}
+          <div className="overflow-hidden pl-1 leading-none">
+            <span
+              className={`font-black uppercase block leading-none select-none pointer-events-none ${roleAccent.light}`}
+              style={{ fontSize: 'clamp(100px, 35vw, 160px)' }}
+            >
+              {mobileTab === 'events' ? 'EVENTS' : watermarkInfo.text}
+            </span>
+          </div>
+
+          {/* HOME TAB */}
+          {mobileTab === 'home' && (
+            <div className="px-4 pt-3 pb-24">
+              <div className="mb-4">
+                <div className="bg-gray-100 rounded-2xl px-4 py-2.5 mb-0.5">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">UPCOMING</span>
+                </div>
+                {upcomingReservations.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-400">No upcoming reservations</div>
+                ) : upcomingReservations.map((r) => (
+                  <button key={r.id} onClick={() => { setSelectedReservation(r); setShowMyReservation(true); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl transition-colors text-left">
+                    <span className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700">{formatReservationLabel(r)}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mb-6">
+                <div className="bg-gray-100 rounded-2xl px-4 py-2.5 mb-0.5">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">CANCELLED</span>
+                </div>
+                {cancelledReservations.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-400">None</div>
+                ) : cancelledReservations.map((r) => (
+                  <div key={r.id} className="flex items-center gap-3 px-4 py-3">
+                    <span className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700">{formatReservationLabel(r)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-xs text-gray-400 px-1">Click on plus to make a new reservation</p>
+            </div>
+          )}
+
+          {/* CALENDAR TAB */}
+          {mobileTab === 'calendar' && (
+            <div className="px-4 pt-1 pb-24">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">RULES</p>
+
+              {/* Room selector */}
+              <div className="relative mb-4">
+                <button
+                  onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
+                  className="w-full flex items-center justify-between px-0 py-2.5 border-b border-gray-200 text-left"
+                >
+                  <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">
+                    {selectedRoom || 'SELECT ROOM'}
+                  </span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                {roomDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                    <button onClick={() => { setSelectedRoom(''); setRoomDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-3 text-sm border-b border-gray-100 hover:bg-gray-50">
+                      All rooms
+                    </button>
+                    {(dynamicRooms ?? ALL_ROOMS).map((room) => (
+                      <button key={room} onClick={() => { setSelectedRoom(room); setRoomDropdownOpen(false); }}
+                        className={`w-full text-left px-4 py-3 text-sm border-b border-gray-100 last:border-0 hover:bg-gray-50 ${selectedRoom === room ? 'font-semibold' : ''}`}>
+                        {room}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Calendar card */}
+              <div className="bg-gray-100 rounded-3xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="font-black text-sm uppercase tracking-wider text-gray-800">CALENDAR</span>
+                  <div className="flex items-center gap-0.5">
+                    <button onClick={() => setMobileDayOffset((d) => d - 1)} className="p-1.5 text-gray-500">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                        <polyline points="15 18 9 12 15 6"/>
+                      </svg>
+                    </button>
+                    <span className="text-[11px] font-semibold text-gray-600 px-1">{weekRangeLabel}</span>
+                    <button onClick={() => setMobileDayOffset((d) => d + 1)} className="p-1.5 text-gray-500">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </button>
+                    <button onClick={() => setShowBooking(true)}
+                      className={`flex items-center gap-1 ${roleAccent.bg} text-white text-[9px] font-bold uppercase tracking-wide px-2.5 py-1.5 rounded-full ml-1`}>
+                      <span className="text-[11px]">+</span> NEW BOOKING
+                    </button>
+                  </div>
+                </div>
+                <div className="mx-3 mb-3 rounded-2xl overflow-hidden" style={{ height: '420px' }}>
+                  <CalendarGrid
+                    reservations={filteredReservations}
+                    weekOffset={0}
+                    dayDates={[mobileDate]}
+                    onReservationClick={handleCalendarClick}
+                    currentUserId={user.id}
+                    userRole={user.role}
+                    startHour={7}
+                    endHour={21}
+                    dark={false}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* EVENTS TAB */}
+          {mobileTab === 'events' && (
+            <div className="px-4 pt-2 pb-24">
+              <div className="bg-gray-100 rounded-3xl overflow-hidden" style={{ minHeight: '350px' }}>
+                {reservations.filter((r) => r.type === 'EVENT' || r.type === 'GLOBAL_EVENT').length === 0 ? (
+                  <div className="flex items-center justify-center" style={{ height: '350px' }}>
+                    <p className="text-sm text-gray-400">No events</p>
+                  </div>
+                ) : reservations
+                    .filter((r) => r.type === 'EVENT' || r.type === 'GLOBAL_EVENT')
+                    .map((r) => (
+                      <button key={r.id} onClick={() => { setSelectedReservation(r); setShowReservationInfo(true); }}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 border-b border-gray-200 last:border-0 hover:bg-gray-200 transition-colors text-left">
+                        <span className={`w-3 h-3 rounded-full flex-shrink-0 ${r.status === 'active' ? 'bg-green-500' : 'bg-red-400'}`} />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">{r.roomName}</p>
+                          <p className="text-xs text-gray-500">{formatReservationLabel(r)}</p>
+                        </div>
+                      </button>
+                    ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom navigation */}
+        <div className="relative bg-white border-t border-gray-100">
+          <div className="flex items-center justify-around px-6 pt-2 pb-4">
+            <button onClick={() => setMobileTab('home')}
+              className={`p-2 transition-colors ${mobileTab === 'home' ? roleAccent.text : 'text-gray-400'}`}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill={mobileTab === 'home' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </button>
+            <button onClick={() => setMobileTab('calendar')}
+              className={`p-2 transition-colors ${mobileTab === 'calendar' ? roleAccent.text : 'text-gray-400'}`}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </button>
+            {/* FAB spacer */}
+            <div className="w-14" />
+            <button onClick={() => setMobileTab('events')}
+              className={`p-2 transition-colors ${mobileTab === 'events' ? roleAccent.text : 'text-gray-400'}`}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill={mobileTab === 'events' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+            </button>
+            <button onClick={() => setShowProfile(true)} className="p-2 text-gray-400">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Center FAB */}
+          <button onClick={() => setShowBooking(true)}
+            className={`absolute -top-7 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full ${roleAccent.bg} shadow-xl flex items-center justify-center`}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Modals */}
+        {showBooking && (
+          <BookingModal user={user} rooms={dynamicRooms} onClose={() => setShowBooking(false)}
+            onConfirm={async (data) => { await onCreateReservation(data); setShowBooking(false); }} />
+        )}
+        {showMyReservation && selectedReservation && (
+          <MyReservationModal reservation={selectedReservation}
+            onClose={() => { setShowMyReservation(false); setSelectedReservation(null); }}
+            onCancel={async () => { await onCancelReservation(selectedReservation.id); setShowMyReservation(false); setSelectedReservation(null); }} />
+        )}
+        {showReservationInfo && selectedReservation && (
+          <ReservationModal reservation={selectedReservation}
+            onClose={() => { setShowReservationInfo(false); setSelectedReservation(null); }} />
+        )}
+        {showProfile && (
+          <ProfileModal user={user} onClose={() => setShowProfile(false)} onUpdate={onUpdateUser} />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={`h-[100dvh] overflow-hidden ${bg} flex flex-col`}>
