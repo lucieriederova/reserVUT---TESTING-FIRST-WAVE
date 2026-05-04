@@ -58,10 +58,10 @@ export default function SignUpView({ onSignUp, onBackToLogin, error }: SignUpVie
     <div className="min-h-screen bg-gray-100 flex flex-col relative font-sans">
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
         <div className="flex flex-col items-center">
-          <span className="bg-[#8b5cf6] text-white text-base sm:text-lg px-4 sm:px-6 py-2 sm:py-2.5 rounded-2xl shadow-sm tracking-tight">
+          <span className="bg-[#9333ea] text-white text-base sm:text-lg px-4 sm:px-6 py-2 sm:py-2.5 rounded-2xl shadow-sm tracking-tight">
             reser<span className="font-extrabold">VUT</span>
           </span>
-          <span className="text-[#8b5cf6] text-[10px] font-bold tracking-widest mt-1">BY LSSL</span>
+          <span className="text-[#9333ea] text-[10px] font-bold tracking-widest mt-1">BY LSSL</span>
         </div>
       </div>
 
@@ -160,7 +160,7 @@ export default function SignUpView({ onSignUp, onBackToLogin, error }: SignUpVie
 
           <p className="text-center text-xs text-gray-500 mt-5">
             Already have an account?{' '}
-            <button onClick={onBackToLogin} className="text-[#8b5cf6] hover:underline font-bold transition-all">
+            <button onClick={onBackToLogin} className="text-[#9333ea] hover:underline font-bold transition-all">
               Sign in
             </button>
           </p>
