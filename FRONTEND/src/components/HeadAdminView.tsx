@@ -517,7 +517,7 @@ export default function HeadAdminView({
       </div>
 
       {showBooking && (
-        <BookingModal user={user} rooms={ROOM_LIST} onClose={() => setShowBooking(false)}
+        <BookingModal user={user} rooms={rooms.length > 0 ? rooms.map(r => r.name) : ROOM_LIST} onClose={() => setShowBooking(false)}
           onConfirm={async (data) => { await onCreateReservation(data); setShowBooking(false); }} />
       )}
       {showProfile && (

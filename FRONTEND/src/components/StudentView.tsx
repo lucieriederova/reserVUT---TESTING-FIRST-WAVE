@@ -254,7 +254,7 @@ export default function StudentView({
                     className={`w-full text-left px-4 py-3 text-sm font-medium border-b ${dropdownItem}`}>
                     All rooms
                   </button>
-                  {ALL_ROOMS.map((room) => (
+                  {(dynamicRooms ?? ALL_ROOMS).map((room) => (
                     <button key={room} onClick={() => { setSelectedRoom(room); setRoomDropdownOpen(false); }}
                       className={`w-full text-left px-4 py-3 text-sm border-b last:border-0 ${dropdownItem} ${selectedRoom === room ? 'font-semibold' : ''}`}>
                       {room}
