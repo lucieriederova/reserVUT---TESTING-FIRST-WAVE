@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { GraduationCap, Briefcase, Compass, ShieldCheck } from 'lucide-react';
+import esbdLogo from '../assets/esbdlogo.png';
 import { UserRole } from './types';
 
 interface LoginViewProps {
@@ -64,10 +65,7 @@ export default function LoginView({ onLogin, onShowSignUp, error, signUpSuccessE
       <div className="flex-1 flex items-center justify-center p-4 pt-16 sm:pt-4">
         <div className="bg-white rounded-2xl shadow-lg w-full max-w-xl p-6 sm:p-10">
           <div className="flex justify-center mb-2">
-            <div className="flex items-center gap-1">
-              <span className="bg-[#d32f2f] text-white font-bold text-xl px-2.5 py-1 rounded">T</span>
-              <span className="bg-[#e0e0e0] text-gray-700 font-bold text-xl px-2.5 py-1 rounded">FP</span>
-            </div>
+            <img src={esbdLogo} alt="ESBD" className="h-12 object-contain" />
           </div>
 
           <h1 className="text-center text-xl font-extrabold text-gray-800 mb-6 tracking-tight">WELCOME</h1>

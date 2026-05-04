@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import esbdLogo from '../assets/esbdlogo.png';
 import { User, Reservation, ALL_ROOMS, ReservationType } from './types';
 import BookingModal from './BookingModal';
 import MyReservationModal from './MyReservationModal';
@@ -148,9 +149,8 @@ export default function StudentView({
 
       {/* TOP NAVBAR */}
       <div className={`${navBg} border-b px-4 sm:px-5 py-2.5 flex items-center justify-between`}>
-        <div className="flex items-center gap-1">
-          <span className="bg-red-600 text-white font-black text-base px-2 py-1 rounded">T</span>
-          <span className="bg-purple-600 text-white font-black text-base px-2 py-1 rounded">FP</span>
+        <div className="flex items-center">
+          <img src={esbdLogo} alt="ESBD" className="h-8 object-contain" />
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button onClick={toggleDark} title={dark ? 'Light mode' : 'Dark mode'}

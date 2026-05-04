@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import esbdLogo from '../assets/esbdlogo.png';
 import { User, Reservation, Room, UserRole, ReservationType } from './types';
 import BookingModal from './BookingModal';
 import ProfileModal from './ProfileModal';
@@ -172,9 +173,8 @@ export default function HeadAdminView({
     <div className={`min-h-screen flex flex-col ${dark ? 'bg-[#141720]' : 'bg-gray-100'}`}>
       {/* NAVBAR */}
       <div className={`${navBg} border-b px-4 py-2 flex items-center justify-between`}>
-        <div className="flex items-center gap-1">
-          <span className="bg-red-600 text-white font-bold text-sm px-1.5 py-0.5 rounded">T</span>
-          <span className="bg-gray-600 text-gray-200 font-bold text-sm px-1.5 py-0.5 rounded">FP</span>
+        <div className="flex items-center">
+          <img src={esbdLogo} alt="ESBD" className="h-8 object-contain" />
         </div>
         <div className="flex items-center gap-3">
           <button onClick={toggleDark} className={`transition-colors ${dark ? 'text-yellow-400' : 'text-gray-400'}`}>
