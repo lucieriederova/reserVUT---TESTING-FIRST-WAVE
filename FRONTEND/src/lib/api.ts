@@ -73,3 +73,8 @@ export async function createRoom(data: { name: string; capacity: number; allowed
   const res = await api.post('/rooms', data);
   return res.data;
 }
+
+export async function deleteRoom(roomName: string) {
+  const res = await api.delete(`/rooms/${encodeURIComponent(roomName)}`);
+  return res.data;
+}

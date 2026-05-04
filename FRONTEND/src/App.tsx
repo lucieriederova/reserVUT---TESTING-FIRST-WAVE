@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabase';
-import { syncLogin, getReservations, createReservation, cancelReservation, getAllUsers, updateUserRole, verifyUser, getRooms, createRoom } from './lib/api';
+import { syncLogin, getReservations, createReservation, cancelReservation, getAllUsers, updateUserRole, verifyUser, getRooms, createRoom, deleteRoom } from './lib/api';
 import { MOCK_RESERVATIONS, MOCK_USERS } from './lib/mockData';
 import { User, Reservation, Room, UserRole, ReservationType, PRIORITY_MAP } from './components/types';
 import LoginView from './components/LoginView';
@@ -325,6 +325,13 @@ export default function App() {
     await fetchRooms();
   };
 
+  const handleDeleteRoom = async (roomName: string) => {
+    if (!USE_MOCK_API) {
+      await deleteRoom(roomName);
+    }
+    await fetchRooms();
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-gray-100 flex items-center justify-center"><p className="text-gray-500 text-sm">Loading...</p></div>;
   }
@@ -351,6 +358,7 @@ export default function App() {
         onChangeUserRole={handleChangeUserRole}
         onVerifyUser={handleVerifyUser}
         onAddRoom={handleAddRoom}
+        onDeleteRoom={handleDeleteRoom}
       />
     );
   }

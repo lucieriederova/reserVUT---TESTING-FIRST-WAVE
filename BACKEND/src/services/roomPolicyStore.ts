@@ -39,3 +39,10 @@ export function upsertRoom(policy: RoomPolicy): void {
   if (i >= 0) rooms[i] = policy;
   else rooms.push(policy);
 }
+
+export function deleteRoom(name: string): boolean {
+  const i = rooms.findIndex((r) => r.name === name);
+  if (i < 0) return false;
+  rooms.splice(i, 1);
+  return true;
+}

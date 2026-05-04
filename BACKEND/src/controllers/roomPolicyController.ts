@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { getAllRooms, getRoomsForRole, upsertRoom, getRoomPolicy } from '../services/roomPolicyStore.js';
+import { getAllRooms, getRoomsForRole, upsertRoom, getRoomPolicy, deleteRoom } from '../services/roomPolicyStore.js';
  
 type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
  
@@ -31,4 +31,11 @@ export function updateRoom(req: Request, res: Response): void {
   const updated = { ...existing, ...req.body };
   upsertRoom(updated);
   res.json(updated);
+}
+
+export function deleteRoomHandler(req: Request, res: Response): void {
+  const roomName = decodeURIComponent(req.params.roomName as string);
+  const deleted = deleteRoom(roomName);
+  if (!deleted) { res.status(404).json({ error: 'Room not found' }); return; }
+  res.json({ success: true });
 }

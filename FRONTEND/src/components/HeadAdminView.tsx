@@ -38,6 +38,7 @@ interface HeadAdminViewProps {
   onChangeUserRole: (userId: string, newRole: UserRole) => Promise<void>;
   onVerifyUser?: (userId: string) => Promise<void>;
   onAddRoom: (room: Omit<Room, 'id'>) => Promise<void>;
+  onDeleteRoom: (roomName: string) => Promise<void>;
 }
 
 const ROOM_LIST = ['Session Room', 'Meeting Room', 'The Stage', 'Panda Room', 'P159', 'Event'];
@@ -91,7 +92,7 @@ const navItems: { key: AdminSection; label: string }[] = [
 
 export default function HeadAdminView({
   user, reservations, rooms, allUsers, onLogout, onCreateReservation,
-  onCancelReservation, onUpdateUser, onChangeUserRole, onVerifyUser, onAddRoom,
+  onCancelReservation, onUpdateUser, onChangeUserRole, onVerifyUser, onAddRoom, onDeleteRoom,
 }: HeadAdminViewProps) {
   const [activeSection, setActiveSection] = useState<AdminSection>('CALENDAR');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -405,6 +406,17 @@ export default function HeadAdminView({
                         {savingRoom ? 'Saving...' : 'Save'}
                       </button>
                     </div>
+                    <button
+                      disabled={savingRoom}
+                      onClick={async () => {
+                        if (!selectedRoomInfo || !confirm(`Delete "${selectedRoomInfo.name}"?`)) return;
+                        setSavingRoom(true);
+                        try { await onDeleteRoom(selectedRoomInfo.name); setSelectedRoomInfo(null); }
+                        catch { /* ignore */ } finally { setSavingRoom(false); }
+                      }}
+                      className="w-full mt-2 py-2 rounded-lg text-sm font-bold text-red-500 hover:bg-red-50 disabled:opacity-40 transition-colors">
+                      Delete room
+                    </button>
                   </div>
                 </div>
               )}
