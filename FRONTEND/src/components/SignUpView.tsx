@@ -69,7 +69,7 @@ export default function SignUpView({ onSignUp, onBackToLogin, error }: SignUpVie
       <div className="flex-1 flex items-center justify-center p-4 pt-16 sm:pt-4">
         <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 sm:p-8">
           <div className="flex justify-center mb-2">
-            <img src={esbdLogo} alt="ESBD" className="h-12 object-contain" />
+            <img src={esbdLogo} alt="ESBD" className="h-14 object-contain" />
           </div>
 
           <h1 className="text-center text-xl font-extrabold text-gray-800 mb-6 tracking-tight">SIGN UP</h1>
