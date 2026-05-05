@@ -72,16 +72,8 @@ export default function StudentView({
     weekday: 'long', day: 'numeric', month: 'numeric',
   });
 
-  const weekRangeLabel = useMemo(() => {
-    const today = new Date();
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - ((today.getDay() + 6) % 7) + currentWeekOffset * 7);
-    monday.setHours(0, 0, 0, 0);
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    const fmt = (d: Date) => `${d.getDate()}.${d.getMonth() + 1}.`;
-    return `${fmt(monday)}-${fmt(sunday)}`;
-  }, [currentWeekOffset]);
+  const MOBILE_DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const mobileDateCompact = `${MOBILE_DAY_NAMES[mobileDate.getDay()]} ${mobileDate.getDate()}.${mobileDate.getMonth() + 1}.`;
 
   const bgFontSize = useMemo(() => {
     const roleText = user.role === 'CEO' ? 'LEADER' : user.role === 'GUIDE' ? 'GUIDE' : 'STUDENT';
@@ -271,18 +263,18 @@ export default function StudentView({
                 )}
               </div>
 
-              {/* Calendar card — no overflow-hidden (blocks iOS touch scroll) */}
+              {/* Calendar card — single day, full natural height, page scrolls for time */}
               <div className="bg-gray-100 rounded-3xl">
                 <div className="flex items-center justify-between px-4 py-3">
                   <span className="font-black text-sm uppercase tracking-wider text-gray-800">CALENDAR</span>
                   <div className="flex items-center gap-0.5">
-                    <button onClick={() => setCurrentWeekOffset((o) => o - 1)} className="p-1.5 text-gray-500">
+                    <button onClick={() => setMobileDayOffset((d) => d - 1)} className="p-1.5 text-gray-500">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                         <polyline points="15 18 9 12 15 6"/>
                       </svg>
                     </button>
-                    <span className="text-[11px] font-semibold text-gray-600 px-1">{weekRangeLabel}</span>
-                    <button onClick={() => setCurrentWeekOffset((o) => o + 1)} className="p-1.5 text-gray-500">
+                    <span className="text-[11px] font-semibold text-gray-600 px-2">{mobileDateCompact}</span>
+                    <button onClick={() => setMobileDayOffset((d) => d + 1)} className="p-1.5 text-gray-500">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                         <polyline points="9 18 15 12 9 6"/>
                       </svg>
@@ -293,11 +285,12 @@ export default function StudentView({
                     </button>
                   </div>
                 </div>
-                {/* No overflow-hidden — essential for iOS touch scroll to work inside CalendarGrid */}
-                <div className="mx-3 mb-3 rounded-2xl flex flex-col" style={{ height: '440px' }}>
+                {/* Full natural height — 14h × 64px row = 896px, outer page scroll handles time navigation */}
+                <div className="mx-3 mb-3" style={{ height: (21 - 7) * 64, display: 'flex', flexDirection: 'column' }}>
                   <CalendarGrid
                     reservations={filteredReservations}
-                    weekOffset={currentWeekOffset}
+                    weekOffset={0}
+                    dayDates={[mobileDate]}
                     onReservationClick={handleCalendarClick}
                     currentUserId={user.id}
                     userRole={user.role}
