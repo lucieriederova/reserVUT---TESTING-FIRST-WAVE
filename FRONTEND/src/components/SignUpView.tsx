@@ -1,3 +1,4 @@
+/** Registration form. Every new account is created as STUDENT (see `App.handleSignUp`); higher roles are granted later by a Head Admin. */
 import { useState } from 'react';
 import esbdLogo from '../assets/esbdlogo.png';
 

@@ -1,3 +1,10 @@
+/**
+ * NOTE: not currently imported anywhere in the backend — `reservationController.ts`
+ * and `memoryStore.ts` implement the same booking rules inline/independently
+ * instead of reading from this table. Kept as a reference/candidate single
+ * source of truth; see the migration checklist for a recommendation to
+ * consolidate the (currently three) parallel definitions of these rules.
+ */
 export type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
 
 export interface RoleRule {

@@ -1,3 +1,13 @@
+/**
+ * Shared domain types and role-based business rules for the frontend.
+ * These mirror (but are not code-shared with) the equivalent constants in
+ * `BACKEND/src/services/memoryStore.ts` / `priorityEngine.ts` — they exist
+ * here so the UI can render correct room/type options and limits without a
+ * round-trip, but the backend re-validates everything server-side. If
+ * either side's rules change, the other must be updated to match.
+ *
+ * Note: "CEO" is the internal/DB role name for what the UI labels "Leader".
+ */
 export type UserRole = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
 export type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'GLOBAL_EVENT' | 'OTHER';
 export type ReservationStatus = 'active' | 'cancelled' | 'preempted';

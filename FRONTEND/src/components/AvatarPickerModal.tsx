@@ -1,6 +1,7 @@
-import { 
-  User, 
-  UserCircle, 
+/** Full avatar grid, opened from `ProfileModal`'s "Show all avatars" link. */
+import {
+  User,
+  UserCircle,
   UserRound, 
   CircleUserRound, 
   Contact, 

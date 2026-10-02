@@ -1,3 +1,11 @@
+/**
+ * "New reservation" form. Client-side constraints here (time slots, max
+ * duration, max lookahead date) mirror the backend's rules to keep the
+ * form usable, but the backend (`validateReservation` /
+ * `reservationController.createReservation`) is the source of truth —
+ * this modal's `handleConfirm` surfaces the server's rejection reason
+ * (CONFLICT, WEEKLY_LIMIT, etc.) if a submission is rejected anyway.
+ */
 import { useState } from 'react';
 import { User, ReservationType, ROOMS_BY_ROLE, TYPES_BY_ROLE, MAX_DURATION_MINUTES } from './types';
 
@@ -14,6 +22,7 @@ interface BookingModalProps {
   }) => Promise<void>;
 }
 
+/** All bookable start times, 07:00–21:00 in 15-minute increments. */
 function generateTimeSlots(): string[] {
   const slots: string[] = [];
   for (let h = 7; h <= 21; h++)
@@ -23,6 +32,7 @@ function generateTimeSlots(): string[] {
 }
 const TIME_SLOTS = generateTimeSlots();
 
+/** Valid end times for a given start time, capped at the role's max booking duration. */
 function getEndSlots(startTime: string, maxMinutes: number): string[] {
   const idx = TIME_SLOTS.indexOf(startTime);
   if (idx < 0) return [];

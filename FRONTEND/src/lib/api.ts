@@ -1,9 +1,15 @@
+/**
+ * Thin wrapper around the reserVUT backend REST API. Every function here
+ * corresponds 1:1 to an Express route in `BACKEND/src/routes`. Errors are
+ * left as thrown Axios errors so callers (mainly `App.tsx`) can inspect
+ * `error.response.data` for backend-specific error codes.
+ */
 /// <reference types="vite/client" />
 import axios from 'axios';
 import { UserRole, ReservationType } from '../components/types';
- 
+
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api';
- 
+
 const api = axios.create({ baseURL: API_URL });
  
 export async function syncLogin(

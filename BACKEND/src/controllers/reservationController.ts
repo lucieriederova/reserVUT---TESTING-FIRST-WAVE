@@ -1,43 +1,28 @@
 import type { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import * as mem from '../services/memoryStore.js';
 import { validateReservation } from '../services/memoryStore.js';
 import { ROLE_PRIORITY } from '../services/priorityEngine.js';
 import { canRoleBookRoom } from '../services/roomPolicyStore.js';
+import { getDb } from '../services/db.js';
 import {
   sendReservationConfirmation,
   sendCancellationEmail,
   sendPreemptionEmail,
 } from '../services/emailService.js';
- 
+
 type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
 type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'GLOBAL_EVENT' | 'OTHER';
- 
-let prisma: PrismaClient | null = null;
-let dbAvailable = false;
- 
-async function getDb(): Promise<PrismaClient | null> {
-  if (!process.env.DATABASE_URL) return null;
-  if (prisma) return dbAvailable ? prisma : null;
-  try {
-    prisma = new PrismaClient();
-    await prisma.$connect();
-    dbAvailable = true;
-    return prisma;
-  } catch {
-    dbAvailable = false;
-    return null;
-  }
-}
- 
+
 const VALID_TYPES: ReservationType[] = ['MEETING', 'SESSION', 'WORKSHOP', 'PITCHDECK', 'EVENT', 'GLOBAL_EVENT', 'OTHER'];
- 
+
+/** Maps a free-form/legacy type string to a canonical `ReservationType`, defaulting unknowns to OTHER. */
 function resolveType(raw?: string): ReservationType {
   if (!raw) return 'MEETING';
   const up = raw.toUpperCase() as ReservationType;
   return VALID_TYPES.includes(up) ? up : 'OTHER';
 }
- 
+
+/** GET /api/reservations — optionally filtered by `?roomName=`. */
 export async function listReservations(req: Request, res: Response): Promise<void> {
   const roomName = req.query.roomName as string | undefined;
   const db = await getDb();
@@ -61,6 +46,25 @@ export async function listReservations(req: Request, res: Response): Promise<voi
   res.json(mem.getReservations(roomName));
 }
  
+/**
+ * POST /api/reservations
+ *
+ * Core booking endpoint implementing the priority-preemption model:
+ * - Validates role-based rules (room access, duration, lead time, weekly
+ *   caps, simultaneous-room limits) via `validateReservation`.
+ * - `GLOBAL_EVENT` reservations are informational only and skip the room
+ *   conflict check entirely (they don't occupy a room slot).
+ * - For a normal booking, any overlapping ACTIVE reservation with a lower
+ *   `priorityLevel` (derived from the booking role, see `priorityEngine.ts`)
+ *   is preempted (status set to PREEMPTED) rather than blocking the new one;
+ *   an overlap with equal-or-higher priority returns a 409 CONFLICT.
+ * - Confirmation/preemption emails are sent asynchronously after the HTTP
+ *   response so email latency never blocks the booking itself.
+ *
+ * The DB and in-memory code paths intentionally duplicate this logic
+ * (`validateReservation` only covers the in-memory path) so the API behaves
+ * identically whether or not `DATABASE_URL` is configured.
+ */
 export async function createReservation(req: Request, res: Response): Promise<void> {
   const body = req.body as any;
   const roomName = (body.roomName ?? body.roomId) as string;
@@ -270,6 +274,13 @@ export async function createReservation(req: Request, res: Response): Promise<vo
   }
 }
  
+/**
+ * DELETE /api/reservations/:id
+ *
+ * Cancels (soft-deletes, via status='CANCELLED') a reservation. Allowed for
+ * the owner, or for anyone whose role priority is strictly higher than the
+ * reservation's stored `priorityLevel` (an admin/leader override).
+ */
 export async function deleteReservation(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
   const { userId, userRole } = req.body as { userId: string; userRole?: Role };
@@ -320,6 +331,7 @@ export async function deleteReservation(req: Request, res: Response): Promise<vo
   }
 }
  
+/** GET /api/reservations/:id — fetches a single reservation with its owning user. */
 export async function getReservation(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
   const reservationId = id as string;

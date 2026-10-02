@@ -1,3 +1,8 @@
+/**
+ * Fixture data for `VITE_USE_MOCK_API=true` mode — lets the UI be built,
+ * demoed and tested without a backend or Supabase project. Not used in the
+ * normal (backend-connected) flow.
+ */
 import { Reservation, User } from '../components/types';
 
 const baseIso = (date: string) => new Date(date).toISOString();

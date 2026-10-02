@@ -1,3 +1,12 @@
+/**
+ * Priority scoring used by the DB-backed reservation flow
+ * (`reservationController.ts`) to decide which reservation wins when two
+ * overlap in the same room. A higher `ROLE_PRIORITY` always beats a lower
+ * one; `TYPE_PRIORITY_BONUS` and `getEffectivePriority`/`canPreempt` are
+ * exposed for future use where the reservation type itself (not just the
+ * booker's role) should influence preemption — the current
+ * `reservationController.createReservation` compares role priority only.
+ */
 export type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
 export type ReservationType = 'MEETING' | 'SESSION' | 'WORKSHOP' | 'PITCHDECK' | 'EVENT' | 'GLOBAL_EVENT' | 'OTHER';
 

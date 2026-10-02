@@ -1,3 +1,4 @@
+/** Auth/user-management routes, mounted at `/api/auth` in `server.ts`. */
 import { Router } from 'express';
 import { loginUser, getUsers, updateUserRole, verifyUser } from '../controllers/authController.js';
 

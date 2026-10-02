@@ -1,3 +1,4 @@
+/** Reservation CRUD routes, mounted at `/api/reservations` in `server.ts`. */
 import { Router } from 'express';
 import { listReservations, createReservation, deleteReservation, getReservation } from '../controllers/reservationController.js';
 

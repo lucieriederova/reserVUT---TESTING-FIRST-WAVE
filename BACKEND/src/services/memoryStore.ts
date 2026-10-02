@@ -1,3 +1,18 @@
+/**
+ * In-memory fallback data store.
+ *
+ * Mirrors the shape of the Prisma models (`User`, `Reservation`, `AuditLog`)
+ * and duplicates the reservation business rules so the API remains fully
+ * functional — including priority-based preemption — when no database is
+ * configured (e.g. quick local development, or a DB outage). State lives
+ * only in process memory and is lost on restart.
+ *
+ * NOTE for migration: `validateReservation` below re-implements the same
+ * constraints the DB-backed path in `reservationController.ts` enforces
+ * inline. If the booking rules change, both places need updating — a
+ * natural next refactor is to extract a single shared "policy" module used
+ * by both code paths.
+ */
 import { v4 as uuidv4 } from 'uuid';
 
 export type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
@@ -111,6 +126,14 @@ export interface ValidationError {
   message: string;
 }
 
+/**
+ * Applies all role-based booking rules for the in-memory code path:
+ * room access, min/max duration, booking-ahead windows, weekly caps and
+ * simultaneous-room limits. Returns `null` when the booking is allowed, or
+ * a `{ code, message }` describing the first violated rule otherwise.
+ * `GLOBAL_EVENT` bookings (HEAD_ADMIN only) skip almost all of these checks
+ * since they're informational and don't occupy a room slot.
+ */
 export function validateReservation(data: {
   roomName: string;
   startTime: string;
@@ -289,6 +312,12 @@ export function getReservationById(id: string): MemReservation | undefined {
   return reservations.find((r) => r.id === id);
 }
 
+/**
+ * Creates a reservation, preempting any lower-priority overlapping
+ * reservations in the same room. Throws an error with `code: 'CONFLICT'`
+ * (and the conflicting reservations attached) if an overlap has equal or
+ * higher priority than the new booking.
+ */
 export function createReservation(data: {
   roomName: string;
   startTime: string;
@@ -365,6 +394,10 @@ export function createReservation(data: {
   return { reservation, preempted: overlapping };
 }
 
+/**
+ * Cancels a reservation. Allowed for the owner, or for a requester whose
+ * role priority strictly exceeds the reservation's stored `priorityLevel`.
+ */
 export function cancelReservation(id: string, requestingUserId: string, requestingRole: Role): MemReservation {
   const r = reservations.find((r) => r.id === id);
   if (!r) throw Object.assign(new Error('Reservation not found'), { code: 'NOT_FOUND' });

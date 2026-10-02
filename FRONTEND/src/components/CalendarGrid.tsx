@@ -1,3 +1,9 @@
+/**
+ * Renders the week/day time-grid calendar shared by StudentView and
+ * HeadAdminView. Pure presentation — booking/cancellation logic lives in
+ * the parent views; this component only lays out reservations by time and
+ * reports clicks via `onReservationClick`.
+ */
 import { useRef, useEffect } from 'react';
 import { Reservation, UserRole } from './types';
 
@@ -54,6 +60,7 @@ function sameLocalDate(a: Date, b: Date): boolean {
   );
 }
 
+/** Computes absolute CSS positioning for one reservation block within its day column. */
 function getReservationStyle(
   r: Reservation,
   startHour: number,

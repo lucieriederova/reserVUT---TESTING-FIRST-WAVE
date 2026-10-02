@@ -1,3 +1,10 @@
+/**
+ * Admin dashboard for the HEAD_ADMIN role: global calendar, role
+ * management (verifying/promoting CEOs and GUIDEs), a user database view,
+ * room policy management and basic usage reports. `ROOM_LIST` is a
+ * display-only fallback used before the real room list has loaded from
+ * `GET /api/rooms`.
+ */
 import React, { useState } from 'react';
 import esbdLogo from '../assets/esbdlogo.png';
 import { User, Reservation, Room, UserRole, ReservationType } from './types';

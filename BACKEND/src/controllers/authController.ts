@@ -1,33 +1,30 @@
 import type { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import * as mem from '../services/memoryStore.js';
 import { sendWelcomeEmail } from '../services/emailService.js';
- 
+import { getDb } from '../services/db.js';
+
 type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
- 
-const HEAD_ADMIN_EMAIL = '269387@vutbr.cz';
- 
-let prisma: PrismaClient | null = null;
-let dbAvailable = false;
- 
-async function getDb(): Promise<PrismaClient | null> {
-  if (!process.env.DATABASE_URL) return null;
-  if (prisma) return dbAvailable ? prisma : null;
-  try {
-    prisma = new PrismaClient();
-    await prisma.$connect();
-    dbAvailable = true;
-    console.log('✅ DB connected');
-    return prisma;
-  } catch {
-    console.warn('⚠️  DB unavailable — using in-memory store');
-    return null;
-  }
-}
- 
+
+/**
+ * Email of the single hard-wired Head Admin account. Configurable via
+ * `HEAD_ADMIN_EMAIL` so this doesn't have to be a code change per
+ * deployment/environment (e.g. staging vs. production). Falls back to the
+ * original faculty account used during development.
+ */
+const HEAD_ADMIN_EMAIL = process.env.HEAD_ADMIN_EMAIL ?? '269387@vutbr.cz';
+
+/** Roles that don't require manual verification by a Head Admin. */
 const AUTO_VERIFIED: Role[] = ['STUDENT', 'HEAD_ADMIN'];
- 
-function mapRole(raw: string, email: string): Role | null {
+
+/**
+ * Normalizes a free-form role string (from the client) into a canonical
+ * `Role`. HEAD_ADMIN is only ever granted to `HEAD_ADMIN_EMAIL` — anyone
+ * else requesting it is silently downgraded to STUDENT.
+ *
+ * Exported (in addition to being used internally) so it can be unit tested
+ * directly — see `controllers/__tests__/authController.test.ts`.
+ */
+export function mapRole(raw: string, email: string): Role | null {
   const map: Record<string, Role> = {
     student: 'STUDENT', STUDENT: 'STUDENT',
     ceo: 'CEO', CEO: 'CEO',
@@ -41,7 +38,16 @@ function mapRole(raw: string, email: string): Role | null {
   }
   return role;
 }
- 
+
+/**
+ * POST /api/auth/login
+ *
+ * Syncs a Supabase-authenticated user into the application's own user store
+ * (Postgres via Prisma, or the in-memory store when the DB is unavailable).
+ * Creates the user on first login; on subsequent logins it updates the
+ * profile fields but preserves the previously assigned role, since only a
+ * Head Admin can change roles afterwards (see `updateUserRole`).
+ */
 export async function loginUser(req: Request, res: Response): Promise<void> {
   const supabaseUserId = (req.body.supabaseUserId || req.body.id) as string;
   const email = req.body.email as string;
@@ -105,6 +111,7 @@ export async function loginUser(req: Request, res: Response): Promise<void> {
   res.json({ user, created: isNew });
 }
  
+/** GET /api/auth/users — lists all users (used by the Head Admin dashboard). */
 export async function getUsers(_req: Request, res: Response): Promise<void> {
   const db = await getDb();
   if (db) {
@@ -118,6 +125,13 @@ export async function getUsers(_req: Request, res: Response): Promise<void> {
   res.json({ users: mem.getAllUsers() });
 }
  
+/**
+ * PATCH /api/auth/users/:id/role
+ *
+ * Admin-only action (enforced on the frontend) to change a user's role.
+ * Roles in `AUTO_VERIFIED` are marked verified immediately; others require
+ * a separate `verifyUser` call before they can book rooms that need it.
+ */
 export async function updateUserRole(req: Request, res: Response): Promise<void> {
   const id = req.params.id as string;
   const rawRole = req.body.role as string;
@@ -143,6 +157,12 @@ export async function updateUserRole(req: Request, res: Response): Promise<void>
   res.json({ user });
 }
  
+/**
+ * PATCH /api/auth/users/:id/verify
+ *
+ * Marks a CEO/GUIDE account as verified, which is a prerequisite for
+ * booking rooms under `validateReservation` (see `memoryStore.ts`).
+ */
 export async function verifyUser(req: Request, res: Response): Promise<void> {
   const id = req.params.id as string;
   const db = await getDb();

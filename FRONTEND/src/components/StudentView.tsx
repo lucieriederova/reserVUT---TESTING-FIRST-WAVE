@@ -1,3 +1,13 @@
+/**
+ * Main screen for STUDENT / CEO ("Leader") / GUIDE roles: calendar,
+ * upcoming/cancelled reservation lists and the booking flow. Renders two
+ * substantially different layouts (a tab-based mobile view below `sm`, and
+ * a sidebar desktop view) from the same state rather than being split into
+ * separate components — `isMobile` (tracked via a resize listener) picks
+ * which JSX branch renders. `rulesContent`/`bookingBtnClass`/`roleAccent`
+ * below are purely display text/styling per role and mirror (but do not
+ * enforce) the booking rules the backend validates server-side.
+ */
 import { useState, useEffect, useMemo } from 'react';
 import esbdLogo from '../assets/esbdlogo.png';
 import { User, Reservation, Room, ALL_ROOMS, ReservationType } from './types';

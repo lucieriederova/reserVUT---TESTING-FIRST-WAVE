@@ -1,10 +1,18 @@
+/**
+ * Transactional email notifications (welcome, booking confirmation,
+ * cancellation, preemption) sent via Resend. All sends are best-effort and
+ * non-fatal: if `RESEND_API_KEY` is unset, or the API call fails, the
+ * calling controller logic is unaffected — see the callers in
+ * `reservationController.ts` / `authController.ts`, which fire these
+ * asynchronously after the HTTP response is already sent.
+ */
 import { Resend } from 'resend';
- 
+
 // Resend client — only initialised when API key is present
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
- 
+
 const FROM = process.env.EMAIL_FROM ?? 'onboarding@resend.dev';
  
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -69,6 +77,7 @@ async function send(to: string, subject: string, html: string): Promise<void> {
  
 // ── Public API ────────────────────────────────────────────────────────────────
  
+/** Sent once, right after a new user is created in `loginUser`. */
 export async function sendWelcomeEmail(to: string, firstName: string): Promise<void> {
   const html = baseHtml('Vítejte v reserVUT', `
     <h1 style="margin:0 0 8px;font-size:22px;color:#111827;">Vítejte, ${firstName}! 🎉</h1>
@@ -90,6 +99,7 @@ export async function sendWelcomeEmail(to: string, firstName: string): Promise<v
   await send(to, 'Vítejte v reserVUT — účet vytvořen', html);
 }
  
+/** Sent to the booker after `createReservation` succeeds. */
 export async function sendReservationConfirmation(params: {
   to: string;
   firstName: string;
@@ -141,6 +151,7 @@ export async function sendReservationConfirmation(params: {
   await send(to, `Rezervace potvrzena — ${roomName}`, html);
 }
  
+/** Sent to the reservation owner after `deleteReservation`. */
 export async function sendCancellationEmail(params: {
   to: string;
   firstName: string;
@@ -176,6 +187,10 @@ export async function sendCancellationEmail(params: {
   await send(to, `Rezervace zrušena — ${roomName}`, html);
 }
  
+/**
+ * Sent to a reservation's original owner when `createReservation`
+ * automatically preempts (bumps) it for a higher-priority booking.
+ */
 export async function sendPreemptionEmail(params: {
   to: string;
   firstName: string;

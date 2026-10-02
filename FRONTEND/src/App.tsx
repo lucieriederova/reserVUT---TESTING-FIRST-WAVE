@@ -1,3 +1,11 @@
+/**
+ * Root application component: owns all session/reservation/room state and
+ * wires it into the role-specific views (`StudentView` covers STUDENT/CEO/GUIDE,
+ * `HeadAdminView` covers HEAD_ADMIN). Auth is handled by Supabase; app data
+ * (users, reservations, rooms) is synced through `lib/api.ts` to the Express
+ * backend. Set `VITE_USE_MOCK_API=true` to run entirely against local mock
+ * data (`lib/mockData.ts`) without a backend or Supabase project.
+ */
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { syncLogin, getReservations, createReservation, cancelReservation, getAllUsers, updateUserRole, verifyUser, getRooms, createRoom, deleteRoom } from './lib/api';
@@ -11,6 +19,14 @@ import HeadAdminView from './components/HeadAdminView';
 const USER_STORAGE_KEY = 'inprofo_user';
 type AppScreen = 'login' | 'signup' | 'app';
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true';
+
+/**
+ * Mirrors `BACKEND/src/controllers/authController.ts`'s `HEAD_ADMIN_EMAIL`.
+ * Used only as an offline fallback (see `handleLogin`'s catch branch) when
+ * the backend sync call fails and the app has to guess the user's role
+ * from Supabase auth data alone.
+ */
+const HEAD_ADMIN_EMAIL = import.meta.env.VITE_HEAD_ADMIN_EMAIL ?? '269387@vutbr.cz';
 
 export default function App() {
   const [screen, setScreen] = useState<AppScreen>('login');
@@ -114,6 +130,13 @@ export default function App() {
     } catch { /* ignore */ }
   };
 
+  /**
+   * Signs in via Supabase, then syncs with the backend to resolve the
+   * user's actual stored role. `selectedRole` is what the user picked on
+   * the login screen — it's only honoured if it is <= their actual role's
+   * priority (see `PRIORITY_MAP`), preventing someone from self-escalating
+   * by picking a higher role in the UI.
+   */
   const handleLogin = async (email: string, password: string, selectedRole: UserRole) => {
     setLoginError('');
     setSignUpSuccessEmail('');
@@ -167,7 +190,7 @@ export default function App() {
         vutId: res.user?.vutId,
       };
     } catch {
-      const fallbackRole: UserRole = email === '269387@vutbr.cz' ? 'HEAD_ADMIN' : 'STUDENT';
+      const fallbackRole: UserRole = email === HEAD_ADMIN_EMAIL ? 'HEAD_ADMIN' : 'STUDENT';
       backendUser = {
         id: data.user.id,
         email: data.user.email!,
@@ -187,6 +210,12 @@ export default function App() {
     if (backendUser.role === 'HEAD_ADMIN') fetchAllUsers();
   };
 
+  /**
+   * Registers via Supabase (always as STUDENT — higher roles are granted
+   * later by a Head Admin). If Supabase auto-confirm is enabled a session
+   * is returned immediately and the user is logged straight in; otherwise
+   * they're sent back to the login screen with an "check your email" notice.
+   */
   const handleSignUp = async (formData: { firstName: string; lastName: string; email: string; password: string }) => {
     if (USE_MOCK_API) {
       setScreen('login');
@@ -241,6 +270,14 @@ export default function App() {
     setScreen('login');
   };
 
+    /**
+     * Calls the reservation API and merges the result into local state.
+     * Errors are intentionally left to propagate to `BookingModal`, which
+     * maps backend error codes (CONFLICT, WEEKLY_LIMIT, etc.) to
+     * user-facing messages. On success, any reservations the backend
+     * preempted are marked 'preempted' locally so the calendar updates
+     * without a full refetch.
+     */
     const handleCreateReservation = async (data: {
       roomName: string;
       startTime: string;
@@ -287,6 +324,11 @@ export default function App() {
     }
   };
 
+  /**
+   * Cancels a reservation. `cancelledIds` tracks IDs cancelled locally so a
+   * subsequent `fetchReservations()` doesn't briefly show them as active
+   * again before the backend's own status update has propagated.
+   */
   const handleCancelReservation = async (id: string) => {
     if (!currentUser) return;
     if (USE_MOCK_API) {

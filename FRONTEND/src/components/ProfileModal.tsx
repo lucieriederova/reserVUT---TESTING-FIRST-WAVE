@@ -1,3 +1,4 @@
+/** Profile summary + quick avatar picker. Avatar/profile edits are local-only (`onUpdate`) and not persisted to the backend. */
 import { useState } from 'react';
 import { User } from './types';
 import AvatarPickerModal, { AVATARS } from './AvatarPickerModal';

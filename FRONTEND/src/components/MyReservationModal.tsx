@@ -1,3 +1,4 @@
+/** Detail view for the current user's own reservation, with a two-step ("are you sure?") cancel flow. */
 import { useState } from 'react';
 import { Reservation } from './types';
 

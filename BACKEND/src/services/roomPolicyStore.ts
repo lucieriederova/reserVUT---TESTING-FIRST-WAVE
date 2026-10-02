@@ -1,3 +1,14 @@
+/**
+ * In-memory room registry: which rooms exist, their capacity and which
+ * roles may book them. Backs `/api/rooms`. Like `memoryStore.ts`, this
+ * state is process-local and resets on restart — rooms created or edited
+ * via the Head Admin "Rooms" panel do not persist across deploys.
+ *
+ * MIGRATION NOTE: room definitions are seeded as a hardcoded array rather
+ * than stored in Postgres alongside `User`/`Reservation`. Moving rooms into
+ * the Prisma schema (a `Room` model) would make this data survive restarts
+ * and be the natural next step if this module is kept post-migration.
+ */
 export type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
 
 export interface RoomPolicy {

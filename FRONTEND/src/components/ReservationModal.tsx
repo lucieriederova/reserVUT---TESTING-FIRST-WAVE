@@ -1,3 +1,4 @@
+/** Read-only detail view for someone else's reservation (no cancel action — see `MyReservationModal` for the owner's version). */
 import { Reservation } from './types';
 
 interface ReservationModalProps {

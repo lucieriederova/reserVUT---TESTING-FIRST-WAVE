@@ -1,3 +1,4 @@
+/** Prev/next week control for the desktop calendar; `offset` is weeks relative to the current week. */
 interface WeekNavigatorProps {
   offset: number;
   onChange: (offset: number) => void;

@@ -1,3 +1,4 @@
+/** Room-policy CRUD routes, mounted at `/api/rooms` in `server.ts`. */
 import { Router } from 'express';
 import { listRooms, createRoom, updateRoom, deleteRoomHandler } from '../controllers/roomPolicyController.js';
 

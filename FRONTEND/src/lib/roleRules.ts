@@ -1,3 +1,10 @@
+/**
+ * NOTE: not currently imported anywhere in the frontend — `components/types.ts`
+ * defines its own, slightly different set of per-role constants
+ * (`ROOMS_BY_ROLE`, `MAX_DURATION_MINUTES`, etc.) which the UI actually
+ * uses. See the migration checklist regarding consolidating the (currently
+ * three) parallel definitions of these rules across backend and frontend.
+ */
 export type Role = 'STUDENT' | 'CEO' | 'GUIDE' | 'HEAD_ADMIN';
 
 export interface RoleRule {

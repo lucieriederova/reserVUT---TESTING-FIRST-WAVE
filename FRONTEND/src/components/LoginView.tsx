@@ -1,3 +1,8 @@
+/**
+ * Login screen. The role picker lets the user choose which role to view
+ * the app as; `App.handleLogin` validates that choice against their actual
+ * stored role and rejects attempts to log in as a higher role than granted.
+ */
 import { useState } from 'react';
 import { GraduationCap, Briefcase, Compass, ShieldCheck } from 'lucide-react';
 import esbdLogo from '../assets/esbdlogo.png';
